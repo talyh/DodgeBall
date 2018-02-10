@@ -7,11 +7,12 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private Agent _agent;
+    private AIAgentController _aiController;
 
     // Use this for initialization
     void Start()
     {
-
+        _aiController = _agent.GetComponent<AIAgentController>();
     }
 
     // Update is called once per frame
