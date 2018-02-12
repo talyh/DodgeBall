@@ -190,7 +190,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 445731486}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 24.1, y: 0.5, z: 46.3}
+  m_LocalPosition: {x: -44.9, y: 0.5, z: -13.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -950,4 +950,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _target: {fileID: 445731490}
   _rb: {fileID: 2032480503}
-  _angularMaxSpeed: 1
+  _angularMaxSpeed: 30

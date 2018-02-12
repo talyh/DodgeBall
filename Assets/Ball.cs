@@ -32,7 +32,7 @@ public class Ball : MonoBehaviour
 
     IEnumerator TurnToTarget()
     {
-        const float correctAngle = 3;
+        const float correctAngle = 1;
 
         float angleToTarget = DetermineAngleToTarget();
         _alignedToTarget = angleToTarget < correctAngle;
@@ -80,6 +80,9 @@ public class Ball : MonoBehaviour
         float acceleration = ConvertForceToAcceleration(frictionalForce, _rb.mass);
         float speed = CalculateInitialVelocity(0.0f, acceleration, distance);
         _rb.velocity = transform.forward * speed;
+
+        Debug.DrawRay(transform.position, transform.forward * distance, Color.blue);
+        Debug.DrawLine(transform.position, _target.position, Color.green);
     }
 
     float CalculateFrictionalForce(FrictionType frictionType)
@@ -158,12 +161,12 @@ public class Ball : MonoBehaviour
 
     public void TurnLeft()
     {
-        _rb.angularVelocity = -transform.up * _angularMaxSpeed;
+        _rb.angularVelocity = -transform.up * _angularMaxSpeed * Mathf.Deg2Rad;
     }
 
     public void TurnRight()
     {
-        _rb.angularVelocity = transform.up * _angularMaxSpeed;
+        _rb.angularVelocity = transform.up * _angularMaxSpeed * Mathf.Deg2Rad;
     }
 
     public void StopTurning()
