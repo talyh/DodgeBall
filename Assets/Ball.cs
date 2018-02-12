@@ -1,140 +1,85 @@
-﻿// using System.Collections;
-// using System.Collections.Generic;
-// using UnityEngine;
-
-// public class Ball : MonoBehaviour
-// {
-
-//     [SerializeField]
-//     private Rigidbody _rb;
-
-//     [SerializeField]
-//     private Transform _target;
-
-//     private float _toTarget;
-//     private float _force;
-
-//     private float _ballStaticFriction = 0.2f;
-//     private float _ballDynamicFriction = 0.3f;
-//     private float _groundStaticFriction = 0.6f;
-//     private float _groundDynamicFriction = 0.4f;
-
-//     private float _normalForce;
-//     private float _startingForce;
-
-//     [SerializeField]
-//     private float _time = 2;
-
-
-//     // Use this for initialization
-//     void Start()
-//     {
-//     }
-
-//     // Update is called once per frame
-//     void FixedUpdate()
-//     {
-//         if (Input.GetKeyDown(KeyCode.Space))
-//         {
-//             CalculateDistanceToTarget();
-//             CalculateForceNeeded();
-
-//             _rb.AddForce(transform.forward * _force);
-//         }
-//     }
-
-//     private void CalculateDistanceToTarget()
-//     {
-//         _toTarget = Vector3.Distance(transform.position, _target.position);
-//     }
-
-//     private void CalculateForceNeeded()
-//     {
-//         CalculateNormalForce();
-//         CalculateAcceleration();
-//     }
-
-//     private void CalculateNormalForce()
-//     {
-//         _normalForce = _rb.mass * Physics.gravity.magnitude;
-//         Debug.Log("Normal Force: " + _normalForce);
-//     }
-
-//     private void CalculateStartingForce()
-//     {
-//         float staticFriction = StaticFrictionCoeficient();
-//         Debug.Log("Static Friction: " + staticFriction);
-
-//         _startingForce = _normalForce * staticFriction;
-//         Debug.Log("Starting Force: " + _startingForce);
-//     }
-
-//     private float StaticFrictionCoeficient()
-//     {
-//         return (_ballStaticFriction + _groundStaticFriction) * 0.5f;
-//     }
-
-//     private float DynamicFrictionCoeficient()
-//     {
-//         return (_ballDynamicFriction * _groundDynamicFriction) * 0.5f;
-//     }
-
-//     private float CalculateFriction()
-//     {
-//         return DynamicFrictionCoeficient() * _normalForce;
-//     }
-
-//     private float CalculateFrictionDeceleration()
-//     {
-//         return CalculateFriction() / _rb.mass;
-//     }
-
-//     private void CalculateAcceleration()
-//     {
-//         // return _toTarget / 0.5f * Mathf.Pow(_time, 2);
-//         _force = CalculateFinalForce() - CalculateFrictionDeceleration();
-//     }
-
-//     private float FinalVelocity()
-//     {
-//         return _toTarget * _time * 2;
-//     }
-
-//     private float CalculateFinalForce()
-//     {
-//         return FinalVelocity() / _time;
-//     }
-// }
-
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    public Transform _target;
+    [SerializeField]
+    private Transform _target = null;
 
+    [SerializeField]
     private Rigidbody _rb = null;
 
-    enum FrictionType { Static = 0, Dynamic };
+    [SerializeField]
+    private float _angularMaxSpeed = 5;
 
-    void Start()
-    {
-        _rb = GetComponent<Rigidbody>();
-    }
+    private enum FrictionType { Static = 0, Dynamic };
+
+    private bool _alignedToTarget = false;
 
     void FixedUpdate()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Vector3 toDestination = _target.position - transform.position;
-            float distance = Mathf.Abs(toDestination.z);
-            float frictionalForce = -1.0f * CalculateFrictionalForce(FrictionType.Dynamic);
-            float acceleration = ConvertForceToAcceleration(frictionalForce, _rb.mass);
-            float speed = CalculateInitialVelocity(0.0f, acceleration, distance);
-            _rb.velocity = transform.forward * speed;
+            StartCoroutine(TurnToTarget());
         }
+
+        if (_alignedToTarget)
+        {
+            MoveToTarget();
+        }
+    }
+
+    IEnumerator TurnToTarget()
+    {
+        const float correctAngle = 3;
+
+        float angleToTarget = DetermineAngleToTarget();
+        _alignedToTarget = angleToTarget < correctAngle;
+
+        bool targetToLeft = _target.position.x - transform.position.x < 1;
+
+        while (!_alignedToTarget)
+        {
+            if (targetToLeft)
+            {
+                TurnLeft();
+            }
+            else
+            {
+                TurnRight();
+            }
+
+            angleToTarget = DetermineAngleToTarget();
+            _alignedToTarget = angleToTarget < correctAngle;
+
+            yield return null;
+        }
+
+        StopTurning();
+    }
+
+    float DetermineAngleToTarget()
+    {
+        Vector3 toDestination = _target.position - transform.position;
+        float distance = Mathf.Abs(toDestination.z);
+        toDestination.Normalize();
+
+        Vector3 lookAt = transform.forward;
+        lookAt.Normalize();
+
+        return Mathf.Rad2Deg * Mathf.Acos(Vector3.Dot(lookAt, toDestination));
+    }
+
+    void MoveToTarget()
+    {
+        Vector3 toDestination = _target.position - transform.position;
+        float distance = Mathf.Abs(toDestination.z);
+
+        float frictionalForce = -1.0f * CalculateFrictionalForce(FrictionType.Dynamic);
+        float acceleration = ConvertForceToAcceleration(frictionalForce, _rb.mass);
+        float speed = CalculateInitialVelocity(0.0f, acceleration, distance);
+        _rb.velocity = transform.forward * speed;
     }
 
     float CalculateFrictionalForce(FrictionType frictionType)
@@ -209,5 +154,20 @@ public class Ball : MonoBehaviour
         //viˆ2 = vfˆ2 - 2ad
         //sqrt(vi2) = sqrt(vf2 - 2ad)
         return Mathf.Sqrt((finalVelocity * finalVelocity) - (2 * acceleration * distance));
+    }
+
+    public void TurnLeft()
+    {
+        _rb.angularVelocity = -transform.up * _angularMaxSpeed;
+    }
+
+    public void TurnRight()
+    {
+        _rb.angularVelocity = transform.up * _angularMaxSpeed;
+    }
+
+    public void StopTurning()
+    {
+        _rb.angularVelocity = Vector3.zero;
     }
 }
