@@ -1,83 +1,119 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class AIAgentController : MonoBehaviour
 {
     [SerializeField]
     private Agent _agent;
 
-    private Vector3 _destination = Vector3.zero;
+    private Transform _target;
 
     [SerializeField]
     private float _scanRadius = 10;
     [SerializeField]
     private float _destinationBuffer = 5;
 
-    LayerMask scan;
+    private bool _alignedToTarget = false;
+    private bool arrived
+    {
+        get { return _target ? false : Vector3.Distance(_agent.transform.position, _target.position) < _destinationBuffer; }
+    }
+
+    private LayerMask _scanLayer;
 
     // Use this for initialization
     void Start()
     {
-        scan = 1 << LayerMask.NameToLayer("Agent") |
-                1 << LayerMask.NameToLayer("Interactable");
+        _scanLayer = 1 << LayerMask.NameToLayer("Agent") |
+                     1 << LayerMask.NameToLayer("Interactable");
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        if (_destination != Vector3.zero)
+        if (_target && arrived)
         {
-            MoveToDestination();
+            return;
         }
-        else
+
+        if (!_target)
         {
             Scan();
         }
-    }
-
-    private void MoveToDestination()
-    {
-        Vector3 lookAt = _agent.transform.forward;
-        lookAt.Normalize();
-        Vector3 toDestination = _destination - _agent.transform.position;
-        float distanceToDestination = toDestination.magnitude;
-        toDestination.Normalize();
-        float angleToDestination = Mathf.Rad2Deg * Mathf.Acos(Vector3.Dot(lookAt, toDestination));
-
-        Debug.DrawRay(transform.position, transform.forward * distanceToDestination, Color.blue);
-        Debug.DrawRay(transform.position, _destination * distanceToDestination, Color.green);
-
-        Debug.Log("angle: " + angleToDestination);
-
-        if (angleToDestination < 10)
-        {
-            _agent.StopTurning();
-            _agent.MoveForwards();
-        }
         else
         {
-            _agent.TurnLeft();
+            CheckAlignmentToTarget();
+
+            if (!_alignedToTarget)
+            {
+                StartCoroutine(TurnToTarget());
+            }
+
+            MoveToTarget();
+        }
+    }
+
+    private void MoveToTarget()
+    {
+        if (!_alignedToTarget)
+        {
+            return;
         }
 
-        if (Vector3.Distance(_agent.transform.position, _destination) < 2)
-        {
-            _agent.StopMoving();
-        }
+        _agent.MoveForwards();
     }
 
     private void Scan()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _scanRadius, scan);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _scanRadius);
 
         foreach (Collider coll in hitColliders)
         {
-            if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
+            if (coll.transform != transform)
             {
-                _destination = coll.transform.position;
-                break;
+                if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
+                {
+                    _target = coll.transform;
+                    break;
+                }
             }
         }
+    }
+
+    IEnumerator TurnToTarget()
+    {
+        bool targetToLeft = _target.position.x - transform.position.x < 1;
+
+        while (!_alignedToTarget)
+        {
+            Debug.DrawLine(transform.position, _target.position, Color.red);
+            Debug.DrawRay(transform.position, transform.forward * 10, Color.blue);
+
+            if (targetToLeft)
+            {
+                _agent.TurnLeft();
+            }
+            else
+            {
+                _agent.TurnRight();
+            }
+
+            CheckAlignmentToTarget();
+
+            yield return null;
+        }
+
+        _agent.StopTurning();
+    }
+
+    void CheckAlignmentToTarget()
+    {
+        RaycastHit hit;
+        Physics.Raycast(transform.position, transform.forward, out hit);
+
+        _alignedToTarget = hit.transform == _target;
     }
 
     private void OnDrawGizmos()

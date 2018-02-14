@@ -32,13 +32,16 @@ public class Agent : MonoBehaviour
     [SerializeField]
     private MeshRenderer _meshRenderer;
 
-    // Use this for initialization
-    void Start()
+    public float currentSpeed
     {
-
+        get { return _rb.velocity.magnitude; }
     }
 
-    // Update is called once per frame
+    public float currentAngularSpeed
+    {
+        get { return _rb.angularVelocity.magnitude; }
+    }
+
     void Update()
     {
         DetermineAgentColor();

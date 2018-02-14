@@ -19,9 +19,14 @@ public class Ball : MonoBehaviour
 
     void FixedUpdate()
     {
+        CheckAlignmentToTarget();
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            StartCoroutine(TurnToTarget());
+            if (!_alignedToTarget)
+            {
+                StartCoroutine(TurnToTarget());
+            }
         }
 
         if (_alignedToTarget)
@@ -32,11 +37,6 @@ public class Ball : MonoBehaviour
 
     IEnumerator TurnToTarget()
     {
-        const float correctAngle = 1;
-
-        float angleToTarget = DetermineAngleToTarget();
-        _alignedToTarget = angleToTarget < correctAngle;
-
         bool targetToLeft = _target.position.x - transform.position.x < 1;
 
         while (!_alignedToTarget)
@@ -50,8 +50,7 @@ public class Ball : MonoBehaviour
                 TurnRight();
             }
 
-            angleToTarget = DetermineAngleToTarget();
-            _alignedToTarget = angleToTarget < correctAngle;
+            CheckAlignmentToTarget();
 
             yield return null;
         }
@@ -59,16 +58,12 @@ public class Ball : MonoBehaviour
         StopTurning();
     }
 
-    float DetermineAngleToTarget()
+    void CheckAlignmentToTarget()
     {
-        Vector3 toDestination = _target.position - transform.position;
-        float distance = Mathf.Abs(toDestination.z);
-        toDestination.Normalize();
+        RaycastHit hit;
+        Physics.Raycast(transform.position, transform.forward, out hit);
 
-        Vector3 lookAt = transform.forward;
-        lookAt.Normalize();
-
-        return Mathf.Rad2Deg * Mathf.Acos(Vector3.Dot(lookAt, toDestination));
+        _alignedToTarget = hit.transform == _target;
     }
 
     void MoveToTarget()
