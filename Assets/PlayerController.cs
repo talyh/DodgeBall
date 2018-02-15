@@ -56,16 +56,13 @@ public class PlayerController : MonoBehaviour
             || Input.GetKeyUp(KeyCode.DownArrow)
             || Input.GetKeyUp(KeyCode.Q)
             || Input.GetKeyUp(KeyCode.RightArrow)
-            )
-        {
-            _agent.StopMoving();
-        }
-        if (Input.GetKeyUp(KeyCode.Q)
+            || Input.GetKeyUp(KeyCode.Q)
             || Input.GetKeyUp(KeyCode.LeftShift)
             || Input.GetKeyUp(KeyCode.E)
             || Input.GetKeyUp(KeyCode.RightShift)
             )
         {
+            _agent.StopMoving();
             _agent.StopTurning();
         }
     }
