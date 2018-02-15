@@ -6,9 +6,11 @@ using System.Linq;
 public class AIAgentController : MonoBehaviour
 {
     [SerializeField]
+    private bool _debugMode;
+    [SerializeField]
     private Agent _agent;
 
-    private Transform _target;
+    public Transform _target;
 
     [SerializeField]
     private float _scanRadius = 10;
@@ -16,25 +18,27 @@ public class AIAgentController : MonoBehaviour
     private float _destinationBuffer = 5;
 
     private bool _alignedToTarget = false;
-    private bool arrived
-    {
-        get { return _target ? false : Vector3.Distance(_agent.transform.position, _target.position) < _destinationBuffer; }
-    }
 
     private LayerMask _scanLayer;
+
+    private Rigidbody _rb;
 
     // Use this for initialization
     void Start()
     {
         _scanLayer = 1 << LayerMask.NameToLayer("Agent") |
                      1 << LayerMask.NameToLayer("Interactable");
+
+        _rb = _agent.GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (_target && arrived)
+        if (_target && Vector3.Distance(_agent.transform.position, _target.position) < _destinationBuffer)
         {
+            _agent.StopMoving();
+            _agent.StopTurning();
             return;
         }
 
@@ -44,81 +48,69 @@ public class AIAgentController : MonoBehaviour
         }
         else
         {
-            CheckAlignmentToTarget();
-
-            if (!_alignedToTarget)
-            {
-                StartCoroutine(TurnToTarget());
-            }
-
             MoveToTarget();
         }
     }
 
     private void MoveToTarget()
     {
-        if (!_alignedToTarget)
-        {
-            return;
-        }
 
-        _agent.MoveForwards();
+
+        Vector3 intendedPosition = transform.position + transform.forward;
+
+
+        Vector3 desiredPosition = _target.position;
+
+        Vector3 steering = desiredPosition - intendedPosition;
+        steering = steering / _rb.mass;
+        steering *= _agent.angularMaxSpeed;
+
+        Vector3 resultingVelocity = intendedPosition - transform.position + steering;
+        resultingVelocity.y = 0;
+        resultingVelocity *= _agent.linearMaxSpeed;
+
+
+        _rb.velocity = resultingVelocity * Time.deltaTime;
+        transform.LookAt(_target);
+
+        if (_debugMode)
+        {
+            Debug.Log("----------------------- " + Time.frameCount + " -----------------------");
+            Debug.Log("transform.position: " + transform.position);
+            Debug.Log("intendedPosition: " + intendedPosition);
+            Debug.DrawRay(transform.position, (intendedPosition - transform.position).normalized * 30, Color.blue);
+            Debug.Log("desiredPosition: " + desiredPosition);
+            Debug.DrawRay(transform.position, (desiredPosition - transform.position).normalized * 30, Color.red);
+            Debug.Log("steering: " + steering);
+            Debug.DrawRay(transform.position, steering.normalized * 30, Color.green);
+            Debug.Log("resultingVelocity: " + resultingVelocity);
+            Debug.DrawRay(transform.position, resultingVelocity.normalized * 30, Color.magenta);
+        }
     }
 
     private void Scan()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _scanRadius);
+        // Collider[] hitColliders = Physics.OverlapSphere(transform.position, _scanRadius);
 
-        foreach (Collider coll in hitColliders)
-        {
-            if (coll.transform != transform)
-            {
-                if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
-                {
-                    _target = coll.transform;
-                    break;
-                }
-            }
-        }
-    }
-
-    IEnumerator TurnToTarget()
-    {
-        bool targetToLeft = _target.position.x - transform.position.x < 1;
-
-        while (!_alignedToTarget)
-        {
-            Debug.DrawLine(transform.position, _target.position, Color.red);
-            Debug.DrawRay(transform.position, transform.forward * 10, Color.blue);
-
-            if (targetToLeft)
-            {
-                _agent.TurnLeft();
-            }
-            else
-            {
-                _agent.TurnRight();
-            }
-
-            CheckAlignmentToTarget();
-
-            yield return null;
-        }
-
-        _agent.StopTurning();
-    }
-
-    void CheckAlignmentToTarget()
-    {
-        RaycastHit hit;
-        Physics.Raycast(transform.position, transform.forward, out hit);
-
-        _alignedToTarget = hit.transform == _target;
+        // foreach (Collider coll in hitColliders)
+        // {
+        //     if (coll.transform != transform)
+        //     {
+        //         if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
+        //         {
+        //             _target = coll.transform;
+        //             break;
+        //         }
+        //     }
+        // }
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.black;
-        Gizmos.DrawWireSphere(transform.position, _scanRadius);
+        if (_debugMode)
+        {
+            Gizmos.color = Color.black;
+            Gizmos.DrawWireSphere(transform.position, _scanRadius);
+        }
     }
 }

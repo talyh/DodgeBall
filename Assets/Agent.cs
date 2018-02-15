@@ -20,8 +20,17 @@ public class Agent : MonoBehaviour
 
     [SerializeField]
     private float _linearMaxSpeed;
+    public float linearMaxSpeed
+    {
+        get { return _linearMaxSpeed; }
+    }
     [SerializeField]
     private float _angularMaxSpeed;
+    public float angularMaxSpeed
+    {
+        get { return _angularMaxSpeed; }
+    }
+
     [SerializeField]
     private float _linearAcceleration;
     [SerializeField]
