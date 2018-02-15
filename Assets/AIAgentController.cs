@@ -10,7 +10,7 @@ public class AIAgentController : MonoBehaviour
     [SerializeField]
     private Agent _agent;
 
-    public Transform _target;
+    private Transform _target;
 
     [SerializeField]
     private float _scanRadius = 10;
@@ -54,10 +54,7 @@ public class AIAgentController : MonoBehaviour
 
     private void MoveToTarget()
     {
-
-
         Vector3 intendedPosition = transform.position + transform.forward;
-
 
         Vector3 desiredPosition = _target.position;
 
@@ -69,13 +66,12 @@ public class AIAgentController : MonoBehaviour
         resultingVelocity.y = 0;
         resultingVelocity *= _agent.linearMaxSpeed;
 
-
-        _rb.velocity = resultingVelocity * Time.deltaTime;
+        _rb.velocity = resultingVelocity * Time.fixedDeltaTime;
         transform.LookAt(_target);
 
         if (_debugMode)
         {
-            Debug.Log("----------------------- " + Time.frameCount + " -----------------------");
+            Debug.Log("----------------------- Frame " + Time.frameCount + " -----------------------");
             Debug.Log("transform.position: " + transform.position);
             Debug.Log("intendedPosition: " + intendedPosition);
             Debug.DrawRay(transform.position, (intendedPosition - transform.position).normalized * 30, Color.blue);
@@ -83,26 +79,31 @@ public class AIAgentController : MonoBehaviour
             Debug.DrawRay(transform.position, (desiredPosition - transform.position).normalized * 30, Color.red);
             Debug.Log("steering: " + steering);
             Debug.DrawRay(transform.position, steering.normalized * 30, Color.green);
-            Debug.Log("resultingVelocity: " + resultingVelocity);
+            Debug.Log("resultingVelocity: " + resultingVelocity + " (scaled to Time.fixedDeltaTime)");
             Debug.DrawRay(transform.position, resultingVelocity.normalized * 30, Color.magenta);
         }
     }
 
     private void Scan()
     {
-        // Collider[] hitColliders = Physics.OverlapSphere(transform.position, _scanRadius);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _scanRadius, _scanLayer);
 
-        // foreach (Collider coll in hitColliders)
-        // {
-        //     if (coll.transform != transform)
-        //     {
-        //         if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
-        //         {
-        //             _target = coll.transform;
-        //             break;
-        //         }
-        //     }
-        // }
+        foreach (Collider coll in hitColliders)
+        {
+            if (coll.transform != transform)
+            {
+                if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
+                {
+                    _target = coll.transform;
+                    break;
+                }
+            }
+        }
+
+        if (_debugMode)
+        {
+            Debug.Log("Target locked: " + _target.gameObject.name);
+        }
     }
 
     private void OnDrawGizmos()
