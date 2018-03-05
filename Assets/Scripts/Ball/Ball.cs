@@ -168,4 +168,9 @@ public class Ball : MonoBehaviour
     {
         _rb.angularVelocity = Vector3.zero;
     }
+
+    public void Attach(Agent agent)
+    {
+        Supporting.Log(string.Format("{0} picked up {1}", agent.name, gameObject.name));
+    }
 }
