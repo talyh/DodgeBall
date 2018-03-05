@@ -119,4 +119,36 @@ public class Agent : MonoBehaviour
     {
         _rb.angularVelocity = Vector3.zero;
     }
+
+    public void MoveToTarget(Transform target, bool debugMode = false)
+    {
+        Vector3 intendedPosition = transform.position + transform.forward;
+
+        Vector3 desiredPosition = target.position;
+
+        Vector3 steering = desiredPosition - intendedPosition;
+        steering = steering / _rb.mass;
+        steering *= angularMaxSpeed;
+
+        Vector3 resultingVelocity = intendedPosition - transform.position + steering;
+        resultingVelocity.y = 0;
+        resultingVelocity *= linearMaxSpeed;
+
+        _rb.velocity = resultingVelocity * Time.fixedDeltaTime;
+        transform.LookAt(target);
+
+        if (debugMode)
+        {
+            Debug.Log("----------------------- Frame " + Time.frameCount + " -----------------------");
+            Debug.Log("transform.position: " + transform.position);
+            Debug.Log("intendedPosition: " + intendedPosition);
+            Debug.DrawRay(transform.position, (intendedPosition - transform.position).normalized * 30, Color.blue);
+            Debug.Log("desiredPosition: " + desiredPosition);
+            Debug.DrawRay(transform.position, (desiredPosition - transform.position).normalized * 30, Color.red);
+            Debug.Log("steering: " + steering);
+            Debug.DrawRay(transform.position, steering.normalized * 30, Color.green);
+            Debug.Log("resultingVelocity: " + resultingVelocity + " (scaled to Time.fixedDeltaTime)");
+            Debug.DrawRay(transform.position, resultingVelocity.normalized * 30, Color.magenta);
+        }
+    }
 }
