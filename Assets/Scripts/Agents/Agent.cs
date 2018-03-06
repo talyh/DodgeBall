@@ -58,14 +58,15 @@ public class Agent : MonoBehaviour
     [SerializeField]
     private MeshRenderer _meshRenderer;
 
+    private Boundaries _boundaries;
+    [SerializeField]
+    private float _maxDistanceToBoundaries = 2;
+
     void Start()
     {
+        EnrollInTeam();
         Setup();
         DetermineAgentColor();
-        EnrollInTeam();
-
-        _angularSpeed = _angularMaxSpeed;
-        _linearSpeed = _linearMaxSpeed;
     }
 
     void Setup()
@@ -86,6 +87,11 @@ public class Agent : MonoBehaviour
         {
             _meshRenderer = GetComponent<MeshRenderer>();
         }
+
+        _angularSpeed = _angularMaxSpeed;
+        _linearSpeed = _linearMaxSpeed;
+
+        _boundaries = GameController.instance.GetTeamBoundaries(this);
     }
 
     void DetermineAgentColor()
@@ -112,6 +118,41 @@ public class Agent : MonoBehaviour
     void EnrollInTeam()
     {
         GameController.instance.EnrollTeamMember(this);
+    }
+
+    private void LateUpdate()
+    {
+        Contain();
+    }
+
+    private void Contain()
+    {
+        if (GoingOut())
+        {
+            Stop();
+            TurnBack();
+        }
+    }
+
+    private bool GoingOut()
+    {
+        float x = transform.position.x + transform.forward.x;
+        float z = transform.position.z + transform.forward.z;
+
+        if (x - _maxDistanceToBoundaries < _boundaries.minX
+            || x + _maxDistanceToBoundaries > _boundaries.maxX
+            || z - _maxDistanceToBoundaries < _boundaries.minZ
+            || z + _maxDistanceToBoundaries > _boundaries.maxZ)
+        {
+            if (_debugMode)
+            {
+                Supporting.Log(string.Format("{0} is trying to go out \n current position: {1} \n X boundaries {2} to {3} \n Z boundaries {4} to {5}",
+                                 name, transform.position, _boundaries.minX, _boundaries.maxX, _boundaries.minZ, _boundaries.maxZ));
+            }
+            return true;
+        }
+
+        return false;
     }
 
     public void MoveForwards()
@@ -144,6 +185,11 @@ public class Agent : MonoBehaviour
         _rb.angularVelocity = -transform.up * _angularSpeed;
     }
 
+    public void TurnBack()
+    {
+        _rb.angularVelocity = -transform.up * 180;
+    }
+
     public void StopMoving()
     {
         _rb.velocity = Vector3.zero;
@@ -160,22 +206,76 @@ public class Agent : MonoBehaviour
         StopTurning();
     }
 
-    public void GoOut()
+    public int Wander()
     {
-        Supporting.Log(string.Format("{0} is out", gameObject.name));
+        int action = Random.Range(0, 100);
+
+        if (_debugMode)
+        {
+            Supporting.Log(string.Format("{0} decided to {1}", name, action));
+        }
+
+        Wander(action);
+
+        return action;
     }
 
-    public void Attach(Rigidbody ball)
+    public void Wander(int action)
+    {
+        if (action >= 0 && action <= 20)
+        {
+            MoveForwards();
+        }
+        else if (action > 20 && action <= 40)
+        {
+            MoveBackwards();
+        }
+        else if (action > 40 && action <= 60)
+        {
+            StrafeLeft();
+        }
+        else if (action > 60 && action <= 80)
+        {
+            StrafeRight();
+        }
+        else if (action > 80 && action <= 85)
+        {
+            TurnRight();
+        }
+        else if (action > 85 && action <= 90)
+        {
+            TurnRight();
+        }
+        else if (action > 90)
+        {
+            Stop();
+        }
+    }
+
+    public void GoOut()
+    {
+        Supporting.Log(string.Format("{0} is out", name));
+        Stop();
+    }
+
+    public void Pickup(Rigidbody ball)
     {
         _springJoint.spring = _spring;
         _springJoint.connectedBody = ball;
     }
 
+    public void Throw()
+    {
+        Ball ball = _springJoint.connectedBody.GetComponent<Ball>();
+
+        if (ball)
+        {
+            ball.Throw();
+        }
+    }
+
     private void OnCollisionEnter(Collision coll)
     {
-        StopMoving();
-        StopTurning();
-
         if (coll.gameObject.tag == GameController.Tags.Ball.ToString())
         {
             Rigidbody ball = coll.gameObject.GetComponent<Rigidbody>();
@@ -184,11 +284,49 @@ public class Agent : MonoBehaviour
             {
                 if (_debugMode)
                 {
-                    Supporting.Log(string.Format("{0} picked up {1}", gameObject.name, ball.name));
+                    Supporting.Log(string.Format("{0} picked up {1}", name, ball.name));
                 }
 
-                Attach(ball);
+                Pickup(ball);
                 _hasBall = true;
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (_debugMode)
+        {
+            Gizmos.color = Color.black;
+            Vector3 size = new Vector3(1, 1, 1);
+            float time = 0.1f;
+
+            Vector3 cornerA = new Vector3(_boundaries.minX, 0, _boundaries.minZ);
+            Gizmos.DrawCube(cornerA, size);
+            if (Application.isPlaying && Time.timeSinceLevelLoad < time)
+            {
+                Supporting.Log(string.Format("{0}'s corner A: {1}", name, cornerA));
+            }
+
+            Vector3 cornerB = new Vector3(_boundaries.maxX, 0, _boundaries.minZ);
+            Gizmos.DrawCube(cornerB, size);
+            if (Application.isPlaying && Time.timeSinceLevelLoad < time)
+            {
+                Supporting.Log(string.Format("{0}'s corner B: {1}", name, cornerB));
+            }
+
+            Vector3 cornerC = new Vector3(_boundaries.minX, 0, _boundaries.maxZ);
+            Gizmos.DrawCube(cornerC, size);
+            if (Application.isPlaying && Time.timeSinceLevelLoad < time)
+            {
+                Supporting.Log(string.Format("{0}'s corner C: {1}", name, cornerC));
+            }
+
+            Vector3 cornerD = new Vector3(_boundaries.maxX, 0, _boundaries.maxZ);
+            Gizmos.DrawCube(cornerD, size);
+            if (Application.isPlaying && Time.timeSinceLevelLoad < time)
+            {
+                Supporting.Log(string.Format("{0}'s corner D: {1}", name, cornerD));
             }
         }
     }

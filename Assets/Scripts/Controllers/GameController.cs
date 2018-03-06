@@ -7,20 +7,30 @@ public class GameController : Singleton<GameController>
 {
     public enum Teams { Red = 0, Blue }
     public enum Tags { Ball = 0, Agent, MiddleLine }
+    public enum Layers { Ball, Agent }
 
+    private List<Agent> _redTeam;
     [SerializeField]
     private Material _redTeamMaterial;
     public Material redTeamMaterial
     {
         get { return _redTeamMaterial; }
     }
+    [SerializeField]
+    private Transform _redTeamArea;
+    private Boundaries _redTeamAreaBoundaries;
 
+    private List<Agent> _blueTeam;
     [SerializeField]
     private Material _blueTeamMaterial;
     public Material blueTeamMaterial
     {
         get { return _blueTeamMaterial; }
     }
+    [SerializeField]
+    private Transform _blueTeamArea;
+    private Boundaries _blueTeamAreaBoundaries;
+
 
     [SerializeField]
     private Material _defaultMaterial;
@@ -29,8 +39,6 @@ public class GameController : Singleton<GameController>
         get { return _defaultMaterial; }
     }
 
-    private List<Agent> _redTeam;
-    private List<Agent> _blueTeam;
 
     private void Start()
     {
@@ -41,6 +49,30 @@ public class GameController : Singleton<GameController>
     {
         _redTeam = new List<Agent>();
         _blueTeam = new List<Agent>();
+    }
+
+    private void DetermineBoundaries(Teams team)
+    {
+        Bounds boundaries;
+        switch (team)
+        {
+            case Teams.Red:
+                boundaries = _redTeamArea.GetComponent<MeshRenderer>().bounds;
+                _redTeamAreaBoundaries.minX = _redTeamArea.transform.position.x - boundaries.size.x / 2;
+                _redTeamAreaBoundaries.maxX = _redTeamArea.transform.position.x + boundaries.size.x / 2;
+                _redTeamAreaBoundaries.minZ = _redTeamArea.transform.position.z - boundaries.size.z / 2;
+                _redTeamAreaBoundaries.maxZ = _redTeamArea.transform.position.z + boundaries.size.z / 2;
+                break;
+            case Teams.Blue:
+                boundaries = _blueTeamArea.GetComponent<MeshRenderer>().bounds;
+                _blueTeamAreaBoundaries.minX = _blueTeamArea.transform.position.x - boundaries.size.x / 2;
+                _blueTeamAreaBoundaries.maxX = _blueTeamArea.transform.position.x + boundaries.size.x / 2;
+                _blueTeamAreaBoundaries.minZ = _blueTeamArea.transform.position.z - boundaries.size.z / 2;
+                _blueTeamAreaBoundaries.maxZ = _blueTeamArea.transform.position.z + boundaries.size.z / 2;
+                break;
+            default:
+                break;
+        }
     }
 
     public void EnrollTeamMember(Agent teamMember)
@@ -81,5 +113,21 @@ public class GameController : Singleton<GameController>
         }
 
         return team.Contains(teamMember);
+    }
+
+    public Boundaries GetTeamBoundaries(Agent teamMember)
+    {
+        if (CheckTeamForMember(teamMember, ref _redTeam))
+        {
+            DetermineBoundaries(Teams.Red);
+            return _redTeamAreaBoundaries;
+        }
+        else if (CheckTeamForMember(teamMember, ref _blueTeam))
+        {
+            DetermineBoundaries(Teams.Blue);
+            return _blueTeamAreaBoundaries;
+        }
+
+        return new Boundaries();
     }
 }

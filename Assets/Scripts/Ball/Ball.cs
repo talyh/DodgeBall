@@ -187,6 +187,11 @@ public class Ball : MonoBehaviour
     //     _rb.angularVelocity = transform.up * _angularMaxSpeed * Mathf.Deg2Rad;
     // }
 
+    public void Throw()
+    {
+        transform.position = transform.forward * 5;
+    }
+
     public void StopMoving()
     {
         _rb.velocity = Vector3.zero;

@@ -1,8 +1,3 @@
-// ##############################################
-//              WRITTEN BY: TALY
-// ##############################################
-
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -71,4 +66,12 @@ public class Supporting
             return false;
         }
     }
+}
+
+public struct Boundaries
+{
+    public float minX;
+    public float maxX;
+    public float minZ;
+    public float maxZ;
 }

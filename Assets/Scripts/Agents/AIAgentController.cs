@@ -29,7 +29,13 @@ public class AIAgentController : MonoBehaviour
 
     private List<Vector3> _pathNodes;
 
-    private bool _movingToTarget;
+    // private bool _movingToTarget;
+
+    private bool _wandering;
+    private int _wanderingAction;
+    private float _timeWandering;
+    [SerializeField]
+    private float _maxTimeWandering;
 
 
     private void Start()
@@ -45,7 +51,6 @@ public class AIAgentController : MonoBehaviour
         }
 
         DetermineWalkMask();
-        DetermineScanMask();
 
         _pathNodes = new List<Vector3>();
     }
@@ -57,8 +62,14 @@ public class AIAgentController : MonoBehaviour
 
     private void DetermineScanMask()
     {
-        // _scanLayer = 1 << LayerMask.NameToLayer("Agent") |
-        //                      1 << LayerMask.NameToLayer("Interactable");
+        if (!_agent.hasBall)
+        {
+            _scanLayer = 1 << LayerMask.NameToLayer(GameController.Layers.Ball.ToString());
+        }
+        else
+        {
+            _scanLayer = 1 << LayerMask.NameToLayer(GameController.Layers.Ball.ToString());
+        }
     }
 
     private void Update()
@@ -74,16 +85,32 @@ public class AIAgentController : MonoBehaviour
         if (_debugMode)
         {
             Supporting.Log("--------------- New Frame -----------------");
-            Supporting.Log(string.Format("{0} at {1}", gameObject.name, transform.position));
+            Supporting.Log(string.Format("{0} at {1}", name, transform.position));
+        }
+
+        if (_target)
+        {
+            MoveToTarget();
+        }
+        else
+        {
+            Scan();
         }
 
         if (!_target)
         {
-            Scan();
-        }
-        else
-        {
-            MoveToTarget();
+            if (!_wandering || _timeWandering >= _maxTimeWandering)
+            {
+                _agent.Stop();
+                _wanderingAction = _agent.Wander();
+                _wandering = true;
+                _timeWandering = 0;
+            }
+            else
+            {
+                _agent.Wander(_wanderingAction);
+                _timeWandering += Time.deltaTime;
+            }
         }
 
         if (_debugMode)
@@ -100,7 +127,7 @@ public class AIAgentController : MonoBehaviour
         {
             if (_debugMode)
             {
-                Supporting.Log(string.Format("{0} found path to target {1}", gameObject.name, _target.name));
+                Supporting.Log(string.Format("{0} found path to target {1}", name, _target.name));
             }
 
             MoveToPoint(_pathNodes[1]);
@@ -109,7 +136,7 @@ public class AIAgentController : MonoBehaviour
         {
             if (_debugMode)
             {
-                Supporting.Log(string.Format("{0} couldn't find path to target {1}", gameObject.name, _target.name), 2);
+                Supporting.Log(string.Format("{0} couldn't find path to target {1}", name, _target.name), 2);
             }
         }
     }
@@ -129,7 +156,7 @@ public class AIAgentController : MonoBehaviour
 
                 if (_debugMode)
                 {
-                    Supporting.Log(string.Format("{0} path: Waypoint {1} >> {2}", gameObject.name, _pathNodes.IndexOf(pathNode), pathNode));
+                    Supporting.Log(string.Format("{0} path: Waypoint {1} >> {2}", name, _pathNodes.IndexOf(pathNode), pathNode));
                 }
             }
         }
@@ -141,7 +168,7 @@ public class AIAgentController : MonoBehaviour
 
         if (_debugMode)
         {
-            Supporting.Log(string.Format("{0} navigating to target: {1}", gameObject.name, destination));
+            Supporting.Log(string.Format("{0} navigating to target: {1}", name, destination));
         }
 
         // Vector3 toDestination = destination - transform.position;
@@ -151,14 +178,14 @@ public class AIAgentController : MonoBehaviour
 
         if (_debugMode)
         {
-            Supporting.Log(string.Format("{0} distance to target: {1}", gameObject.name, distance));
+            Supporting.Log(string.Format("{0} distance to target: {1}", name, distance));
         }
 
         if (distance < _destinationBuffer)
         {
             if (_debugMode)
             {
-                Supporting.Log(string.Format("{0} arrived at {1}", gameObject.name, destination));
+                Supporting.Log(string.Format("{0} arrived at {1}", name, destination));
             }
 
             _pathNodes.Remove(destination);
@@ -193,36 +220,40 @@ public class AIAgentController : MonoBehaviour
 
     private void Scan()
     {
-        // Collider[] hitColliders = Physics.OverlapSphere(transform.position, _scanRadius, _scanLayer);
+        DetermineScanMask();
 
-        // foreach (Collider coll in hitColliders)
-        // {
-        //     if (coll.transform != transform)
-        //     {
-        //         if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
-        //         {
-        //             _target = coll.transform;
-        //             break;
-        //         }
-        //     }
-        // }
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _scanRadius, _scanLayer);
 
-        // if (_debugMode)
-        // {
-        //Debug.Log("Target locked: " + _target.gameObject.name);
-        // }
+        foreach (Collider coll in hitColliders)
+        {
+            if (coll.transform != transform)
+            {
+                if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
+                {
+                    _target = coll.transform;
+                    _wandering = false;
+
+                    if (_debugMode)
+                    {
+                        Debug.Log("Target locked: " + _target.name);
+                    }
+
+                    break;
+                }
+            }
+        }
     }
 
     private void OnTriggerEnter(Collider coll)
     {
         if (_debugMode)
         {
-            Supporting.Log(string.Format("{0} triggered {1}", gameObject.name, coll.name));
+            Supporting.Log(string.Format("{0} triggered {1}", name, coll.name));
         }
 
         if (coll.gameObject.tag == GameController.Tags.MiddleLine.ToString())
         {
-            _agent.Stop();
+            _agent.GoOut();
         }
     }
 
