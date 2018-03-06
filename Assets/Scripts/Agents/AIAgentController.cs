@@ -4,10 +4,12 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.AI;
 
+[RequireComponent(typeof(Agent))]
 public class AIAgentController : MonoBehaviour
 {
     [SerializeField]
     private bool _debugMode;
+
     [SerializeField]
     private Agent _agent;
 
@@ -21,7 +23,7 @@ public class AIAgentController : MonoBehaviour
     [SerializeField]
     private float _destinationBuffer = 5;
 
-    private bool _alignedToTarget = false;
+    // private bool _alignedToTarget = false;
 
     private LayerMask _scanLayer;
 
@@ -30,8 +32,18 @@ public class AIAgentController : MonoBehaviour
     private bool _movingToTarget;
 
 
-    void Start()
+    private void Start()
     {
+        Setup();
+    }
+
+    private void Setup()
+    {
+        if (!_agent)
+        {
+            _agent = GetComponent<Agent>();
+        }
+
         DetermineWalkMask();
         DetermineScanMask();
 
@@ -49,6 +61,14 @@ public class AIAgentController : MonoBehaviour
         //                      1 << LayerMask.NameToLayer("Interactable");
     }
 
+    private void Update()
+    {
+        if (_agent.hasBall)
+        {
+            _target = null;
+        }
+    }
+
     private void FixedUpdate()
     {
         if (_debugMode)
@@ -59,7 +79,8 @@ public class AIAgentController : MonoBehaviour
 
         if (!_target)
         {
-            Scan();
+            // Scan();
+            _agent.MoveForwards();
         }
         else
         {
@@ -154,9 +175,9 @@ public class AIAgentController : MonoBehaviour
 
         Vector3 toDestination = destination - transform.position;
         toDestination.Normalize();
-        float lookAtToDestinationDot = Vector3.Dot(transform.forward, toDestination);
+        // float lookAtToDestinationDot = Vector3.Dot(transform.forward, toDestination);
         float rightToDestinationDot = Vector3.Dot(transform.right, toDestination);
-        float toDestinationAngle = Mathf.Rad2Deg * Mathf.Acos(lookAtToDestinationDot);
+        // float toDestinationAngle = Mathf.Rad2Deg * Mathf.Acos(lookAtToDestinationDot);
 
         bool shouldTurnRight = rightToDestinationDot > Mathf.Epsilon;
         if (shouldTurnRight)
