@@ -79,8 +79,7 @@ public class AIAgentController : MonoBehaviour
 
         if (!_target)
         {
-            // Scan();
-            _agent.MoveForwards();
+            Scan();
         }
         else
         {
@@ -212,6 +211,19 @@ public class AIAgentController : MonoBehaviour
         // {
         //Debug.Log("Target locked: " + _target.gameObject.name);
         // }
+    }
+
+    private void OnTriggerEnter(Collider coll)
+    {
+        if (_debugMode)
+        {
+            Supporting.Log(string.Format("{0} triggered {1}", gameObject.name, coll.name));
+        }
+
+        if (coll.gameObject.tag == GameController.Tags.MiddleLine.ToString())
+        {
+            _agent.Stop();
+        }
     }
 
     private void OnDrawGizmos()

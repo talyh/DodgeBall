@@ -6,7 +6,7 @@ using UnityEngine;
 public class GameController : Singleton<GameController>
 {
     public enum Teams { Red = 0, Blue }
-    public enum Tags { Ball = 0, Agent }
+    public enum Tags { Ball = 0, Agent, MiddleLine }
 
     [SerializeField]
     private Material _redTeamMaterial;
@@ -34,6 +34,11 @@ public class GameController : Singleton<GameController>
 
     private void Start()
     {
+        Setup();
+    }
+
+    private void Setup()
+    {
         _redTeam = new List<Agent>();
         _blueTeam = new List<Agent>();
     }
@@ -43,7 +48,7 @@ public class GameController : Singleton<GameController>
         switch (teamMember.team)
         {
             case Teams.Red:
-                if (!CheckTeamForMember(teamMember, _redTeam))
+                if (!CheckTeamForMember(teamMember, ref _redTeam))
                 {
                     _redTeam.Add(teamMember);
                 }
@@ -53,7 +58,7 @@ public class GameController : Singleton<GameController>
                 }
                 break;
             case Teams.Blue:
-                if (!CheckTeamForMember(teamMember, _blueTeam))
+                if (!CheckTeamForMember(teamMember, ref _blueTeam))
                 {
                     _blueTeam.Add(teamMember);
                 }
@@ -68,8 +73,13 @@ public class GameController : Singleton<GameController>
         }
     }
 
-    private bool CheckTeamForMember(Agent teamMember, List<Agent> team)
+    private bool CheckTeamForMember(Agent teamMember, ref List<Agent> team)
     {
+        if (team == null)
+        {
+            Setup();
+        }
+
         return team.Contains(teamMember);
     }
 }
