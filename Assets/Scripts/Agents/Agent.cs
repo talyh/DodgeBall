@@ -3,14 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(SpringJoint))]
 [RequireComponent(typeof(MeshRenderer))]
 public class Agent : MonoBehaviour
 {
+    [SerializeField]
+    private bool _debugMode;
+
     [SerializeField]
     private GameController.Teams _team;
     public GameController.Teams team
     {
         get { return _team; }
+    }
+
+    private bool _hasBall;
+    public bool hasBall
+    {
+        get { return _hasBall; }
     }
 
     private float _linearSpeed;
@@ -42,6 +52,10 @@ public class Agent : MonoBehaviour
     [SerializeField]
     private Rigidbody _rb;
     [SerializeField]
+    private SpringJoint _springJoint;
+    [SerializeField]
+    private float _spring = 5;
+    [SerializeField]
     private MeshRenderer _meshRenderer;
 
     void Start()
@@ -61,7 +75,14 @@ public class Agent : MonoBehaviour
             _rb = GetComponent<Rigidbody>();
         }
 
-        if (_meshRenderer)
+        if (!_springJoint)
+        {
+            _springJoint = GetComponent<SpringJoint>();
+        }
+
+        _springJoint.spring = 0;
+
+        if (!_meshRenderer)
         {
             _meshRenderer = GetComponent<MeshRenderer>();
         }
@@ -139,6 +160,17 @@ public class Agent : MonoBehaviour
         StopTurning();
     }
 
+    public void GoOut()
+    {
+        Supporting.Log(string.Format("{0} is out", gameObject.name));
+    }
+
+    public void Attach(Rigidbody ball)
+    {
+        _springJoint.spring = _spring;
+        _springJoint.connectedBody = ball;
+    }
+
     private void OnCollisionEnter(Collision coll)
     {
         StopMoving();
@@ -146,11 +178,17 @@ public class Agent : MonoBehaviour
 
         if (coll.gameObject.tag == GameController.Tags.Ball.ToString())
         {
-            Ball ball = coll.gameObject.GetComponent<Ball>();
+            Rigidbody ball = coll.gameObject.GetComponent<Rigidbody>();
 
             if (ball)
             {
-                ball.Attach(this);
+                if (_debugMode)
+                {
+                    Supporting.Log(string.Format("{0} picked up {1}", gameObject.name, ball.name));
+                }
+
+                Attach(ball);
+                _hasBall = true;
             }
         }
     }
