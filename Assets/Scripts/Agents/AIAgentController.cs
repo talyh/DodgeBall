@@ -8,9 +8,6 @@ using UnityEngine.AI;
 public class AIAgentController : MonoBehaviour
 {
     [SerializeField]
-    private bool _debugMode;
-
-    [SerializeField]
     private Agent _agent;
 
     private int _courtAreaMask;
@@ -82,7 +79,7 @@ public class AIAgentController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_debugMode)
+        if (_agent.debugMode)
         {
             Supporting.Log("--------------- New Frame -----------------");
             Supporting.Log(string.Format("{0} at {1}", name, transform.position));
@@ -99,6 +96,23 @@ public class AIAgentController : MonoBehaviour
 
         if (!_target)
         {
+            NavMeshPath path = new NavMeshPath();
+
+            Vector3 origin = _agent.transform.position;
+            Vector3 destination = transform.InverseTransformDirection(_agent.transform.forward);
+
+            bool pathForward = NavMesh.CalculatePath(origin, destination, _courtAreaMask, path);
+
+            if (!pathForward)
+            {
+                if (_agent.debugMode)
+                {
+                    Supporting.Log(string.Format("{0} couldn't find a path forward from {1} to {2} in area {3}", name, origin, destination, _courtAreaMask, 2));
+                }
+
+                return;
+            }
+
             if (!_wandering || _timeWandering >= _maxTimeWandering)
             {
                 _agent.Stop();
@@ -113,7 +127,7 @@ public class AIAgentController : MonoBehaviour
             }
         }
 
-        if (_debugMode)
+        if (_agent.debugMode)
         {
             Supporting.Log("-------------------------------------------");
         }
@@ -125,7 +139,7 @@ public class AIAgentController : MonoBehaviour
 
         if (_pathNodes.Count > 0)
         {
-            if (_debugMode)
+            if (_agent.debugMode)
             {
                 Supporting.Log(string.Format("{0} found path to target {1}", name, _target.name));
             }
@@ -134,7 +148,7 @@ public class AIAgentController : MonoBehaviour
         }
         else
         {
-            if (_debugMode)
+            if (_agent.debugMode)
             {
                 Supporting.Log(string.Format("{0} couldn't find path to target {1}", name, _target.name), 2);
             }
@@ -154,7 +168,7 @@ public class AIAgentController : MonoBehaviour
             {
                 _pathNodes.Add(pathNode);
 
-                if (_debugMode)
+                if (_agent.debugMode)
                 {
                     Supporting.Log(string.Format("{0} path: Waypoint {1} >> {2}", name, _pathNodes.IndexOf(pathNode), pathNode));
                 }
@@ -166,7 +180,7 @@ public class AIAgentController : MonoBehaviour
     {
         destination.y = transform.position.y;
 
-        if (_debugMode)
+        if (_agent.debugMode)
         {
             Supporting.Log(string.Format("{0} navigating to target: {1}", name, destination));
         }
@@ -176,14 +190,14 @@ public class AIAgentController : MonoBehaviour
 
         float distance = Vector3.Distance(destination, transform.position);
 
-        if (_debugMode)
+        if (_agent.debugMode)
         {
             Supporting.Log(string.Format("{0} distance to target: {1}", name, distance));
         }
 
         if (distance < _destinationBuffer)
         {
-            if (_debugMode)
+            if (_agent.debugMode)
             {
                 Supporting.Log(string.Format("{0} arrived at {1}", name, destination));
             }
@@ -233,7 +247,7 @@ public class AIAgentController : MonoBehaviour
                     _target = coll.transform;
                     _wandering = false;
 
-                    if (_debugMode)
+                    if (_agent.debugMode)
                     {
                         Debug.Log("Target locked: " + _target.name);
                     }
@@ -246,7 +260,7 @@ public class AIAgentController : MonoBehaviour
 
     private void OnTriggerEnter(Collider coll)
     {
-        if (_debugMode)
+        if (_agent.debugMode)
         {
             Supporting.Log(string.Format("{0} triggered {1}", name, coll.name));
         }
@@ -259,7 +273,7 @@ public class AIAgentController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (_debugMode)
+        if (_agent.debugMode)
         {
             Gizmos.color = Color.black;
             Gizmos.DrawWireSphere(transform.position, _scanRadius);

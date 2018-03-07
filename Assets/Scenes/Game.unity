@@ -491,7 +491,7 @@ Prefab:
     - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
         type: 2}
       propertyPath: _maxDistanceToBoundaries
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
@@ -826,7 +826,7 @@ Prefab:
     - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
         type: 2}
       propertyPath: _maxDistanceToBoundaries
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4021046290206194, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -843,6 +843,11 @@ Prefab:
     - target: {fileID: 4021046290206194, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
       propertyPath: m_LocalScale.z
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: debugMode
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}

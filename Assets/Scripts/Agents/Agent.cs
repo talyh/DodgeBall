@@ -7,8 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer))]
 public class Agent : MonoBehaviour
 {
-    [SerializeField]
-    private bool _debugMode;
+    public bool debugMode;
 
     [SerializeField]
     private GameController.Teams _team;
@@ -144,7 +143,7 @@ public class Agent : MonoBehaviour
             || z - _maxDistanceToBoundaries < _boundaries.minZ
             || z + _maxDistanceToBoundaries > _boundaries.maxZ)
         {
-            if (_debugMode)
+            if (debugMode)
             {
                 Supporting.Log(string.Format("{0} is trying to go out \n current position: {1} \n X boundaries {2} to {3} \n Z boundaries {4} to {5}",
                                  name, transform.position, _boundaries.minX, _boundaries.maxX, _boundaries.minZ, _boundaries.maxZ));
@@ -210,7 +209,7 @@ public class Agent : MonoBehaviour
     {
         int action = Random.Range(0, 100);
 
-        if (_debugMode)
+        if (debugMode)
         {
             Supporting.Log(string.Format("{0} decided to {1}", name, action));
         }
@@ -282,7 +281,7 @@ public class Agent : MonoBehaviour
 
             if (ball)
             {
-                if (_debugMode)
+                if (debugMode)
                 {
                     Supporting.Log(string.Format("{0} picked up {1}", name, ball.name));
                 }
@@ -295,7 +294,7 @@ public class Agent : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (_debugMode)
+        if (debugMode)
         {
             Gizmos.color = Color.black;
             Vector3 size = new Vector3(1, 1, 1);
