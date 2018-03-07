@@ -7,6 +7,9 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer))]
 public class Agent : MonoBehaviour
 {
+    public delegate void TookBall();
+    public event TookBall tookball;
+
     public bool debugMode;
 
     [SerializeField]
@@ -148,6 +151,7 @@ public class Agent : MonoBehaviour
                 Supporting.Log(string.Format("{0} is trying to go out \n current position: {1} \n X boundaries {2} to {3} \n Z boundaries {4} to {5}",
                                  name, transform.position, _boundaries.minX, _boundaries.maxX, _boundaries.minZ, _boundaries.maxZ));
             }
+
             return true;
         }
 
@@ -261,14 +265,21 @@ public class Agent : MonoBehaviour
     {
         _springJoint.spring = _spring;
         _springJoint.connectedBody = ball;
+        _hasBall = true;
+        tookball();
     }
 
     public void Throw()
     {
+        Debug.Log("THROWING");
+
         Ball ball = _springJoint.connectedBody.GetComponent<Ball>();
 
         if (ball)
         {
+            _springJoint.connectedBody = null;
+            _springJoint.spring = 0;
+            _hasBall = false;
             ball.Throw();
         }
     }
@@ -287,7 +298,6 @@ public class Agent : MonoBehaviour
                 }
 
                 Pickup(ball);
-                _hasBall = true;
             }
         }
     }

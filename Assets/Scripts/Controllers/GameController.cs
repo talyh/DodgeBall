@@ -53,26 +53,25 @@ public class GameController : Singleton<GameController>
 
     private void DetermineBoundaries(Teams team)
     {
-        Bounds boundaries;
         switch (team)
         {
             case Teams.Red:
-                boundaries = _redTeamArea.GetComponent<MeshRenderer>().bounds;
-                _redTeamAreaBoundaries.minX = _redTeamArea.transform.position.x - boundaries.size.x / 2;
-                _redTeamAreaBoundaries.maxX = _redTeamArea.transform.position.x + boundaries.size.x / 2;
-                _redTeamAreaBoundaries.minZ = _redTeamArea.transform.position.z - boundaries.size.z / 2;
-                _redTeamAreaBoundaries.maxZ = _redTeamArea.transform.position.z + boundaries.size.z / 2;
+                SetBoundaries(ref _redTeamAreaBoundaries, _redTeamArea, _redTeamArea.GetComponent<MeshRenderer>().bounds);
                 break;
             case Teams.Blue:
-                boundaries = _blueTeamArea.GetComponent<MeshRenderer>().bounds;
-                _blueTeamAreaBoundaries.minX = _blueTeamArea.transform.position.x - boundaries.size.x / 2;
-                _blueTeamAreaBoundaries.maxX = _blueTeamArea.transform.position.x + boundaries.size.x / 2;
-                _blueTeamAreaBoundaries.minZ = _blueTeamArea.transform.position.z - boundaries.size.z / 2;
-                _blueTeamAreaBoundaries.maxZ = _blueTeamArea.transform.position.z + boundaries.size.z / 2;
+                SetBoundaries(ref _blueTeamAreaBoundaries, _blueTeamArea, _blueTeamArea.GetComponent<MeshRenderer>().bounds);
                 break;
             default:
                 break;
         }
+    }
+
+    private void SetBoundaries(ref Boundaries boundaries, Transform area, Bounds bounds)
+    {
+        boundaries.minX = area.position.x - bounds.size.x / 2;
+        boundaries.maxX = area.position.x + bounds.size.x / 2;
+        boundaries.minZ = area.position.z - bounds.size.z / 2;
+        boundaries.maxZ = area.position.z + bounds.size.z / 2;
     }
 
     public void EnrollTeamMember(Agent teamMember)

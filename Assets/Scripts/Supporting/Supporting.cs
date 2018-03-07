@@ -66,6 +66,19 @@ public class Supporting
             return false;
         }
     }
+
+    public static int GetNavMeshIndex(int bitfield)
+    {
+        int factored = 0;
+
+        while (bitfield % 2 == 0)
+        {
+            bitfield /= 2;
+            factored++;
+        }
+
+        return factored;
+    }
 }
 
 public struct Boundaries
