@@ -247,6 +247,14 @@ public class AIAgentController : MonoBehaviour
     private void Scan()
     {
         DetermineScanMask();
+
+        // if my team has the ball, don't bother scanning for it
+        if (_currentScanLayer == LayerMask.NameToLayer(GameController.Layers.Ball.ToString()) &&
+            GameController.instance.teamWithBall == _agent.team)
+        {
+            return;
+        }
+
         DetermineScanRadius();
 
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, _currentScanRadius, _currentScanLayer);
@@ -257,12 +265,22 @@ public class AIAgentController : MonoBehaviour
             {
                 if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
                 {
+                    Agent agent = coll.GetComponent<Agent>();
+
+                    if (agent)
+                    {
+                        if (agent.team == _agent.team)
+                        {
+                            return;
+                        }
+                    }
+
                     _target = coll.transform;
                     _wandering = false;
 
                     if (_agent.debugMode)
                     {
-                        Debug.Log("Target locked: " + _target.name);
+                        Supporting.Log(string.Format("{0} locked onto target {1}", name, _target.name));
                     }
 
                     break;
@@ -282,8 +300,14 @@ public class AIAgentController : MonoBehaviour
 
         if (distanceToTarget > _minThrowingDistance && distanceToTarget < _maxThrowingDistance)
         {
-            _agent.Throw();
+            Throw();
         }
+    }
+
+    private void Throw()
+    {
+        _agent.Throw(_target);
+        _target = null;
     }
 
     private void OnTriggerEnter(Collider coll)

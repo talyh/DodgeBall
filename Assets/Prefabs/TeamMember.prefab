@@ -23,7 +23,6 @@ GameObject:
   - component: {fileID: 136764844432858434}
   - component: {fileID: 23352743901423646}
   - component: {fileID: 54261337859368294}
-  - component: {fileID: 145421100235027528}
   - component: {fileID: 114340305289821412}
   - component: {fileID: 114368980718588580}
   m_Layer: 8
@@ -39,8 +38,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1298984379155410}
-  m_LocalRotation: {x: 0, y: -0.86602545, z: 0, w: 0.49999994}
-  m_LocalPosition: {x: -29.6, y: 2, z: 35.1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -42, y: 2, z: -38.1}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 0}
@@ -115,14 +114,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugMode: 0
-  _team: 1
+  _team: 0
   _linearMaxSpeed: 5
   _angularMaxSpeed: 5
   _rb: {fileID: 54261337859368294}
-  _springJoint: {fileID: 145421100235027528}
-  _spring: 5
   _meshRenderer: {fileID: 23352743901423646}
   _maxDistanceToBoundaries: 2
+  _ball: {fileID: 0}
+  _throwForce: 15
 --- !u!114 &114368980718588580
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -136,12 +135,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _agent: {fileID: 114340305289821412}
   _target: {fileID: 0}
-  _scanRadiusForBall: 8
-  _scanRadiusForOpponent: 20
+  _scanRadiusForBall: 20
+  _scanRadiusForOpponent: 100
   _destinationBuffer: 3
   _maxTimeWandering: 5
-  _minThrowingDistance: 2
-  _maxThrowingDistance: 8
+  _minThrowingDistance: 20
+  _maxThrowingDistance: 80
 --- !u!136 &136764844432858434
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -155,25 +154,3 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!145 &145421100235027528
-SpringJoint:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1298984379155410}
-  m_ConnectedBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 1, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -29.6, y: 4, z: 35.1}
-  serializedVersion: 2
-  m_Spring: 10
-  m_Damper: 0.2
-  m_MinDistance: 0
-  m_MaxDistance: 0
-  m_Tolerance: 0.025
-  m_BreakForce: Infinity
-  m_BreakTorque: Infinity
-  m_EnableCollision: 0
-  m_EnablePreprocessing: 1
-  m_MassScale: 1
-  m_ConnectedMassScale: 1

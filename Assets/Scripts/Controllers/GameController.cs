@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameController : Singleton<GameController>
 {
-    public enum Teams { Red = 0, Blue }
+    public enum Teams { None = -1, Red = 0, Blue }
     public enum Tags { Ball = 0, Agent, MiddleLine }
     public enum Layers { Ball, Agent }
 
@@ -39,6 +39,11 @@ public class GameController : Singleton<GameController>
         get { return _defaultMaterial; }
     }
 
+    public Teams teamWithBall
+    {
+        get { return CheckTeamWithBall(); }
+    }
+
 
     private void Start()
     {
@@ -47,8 +52,15 @@ public class GameController : Singleton<GameController>
 
     private void Setup()
     {
-        _redTeam = new List<Agent>();
-        _blueTeam = new List<Agent>();
+        if (_redTeam == null)
+        {
+            _redTeam = new List<Agent>();
+        }
+
+        if (_blueTeam == null)
+        {
+            _blueTeam = new List<Agent>();
+        }
     }
 
     private void DetermineBoundaries(Teams team)
@@ -128,5 +140,19 @@ public class GameController : Singleton<GameController>
         }
 
         return new Boundaries();
+    }
+
+    private Teams CheckTeamWithBall()
+    {
+        if (_blueTeam.Exists(agent => agent.hasBall))
+        {
+            return Teams.Blue;
+        }
+        else if (_redTeam.Exists(agent => agent.hasBall))
+        {
+            return Teams.Red;
+        }
+
+        return Teams.None;
     }
 }

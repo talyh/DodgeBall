@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(SpringJoint))]
+// [RequireComponent(typeof(SpringJoint))]
 [RequireComponent(typeof(MeshRenderer))]
 public class Agent : MonoBehaviour
 {
@@ -22,7 +22,8 @@ public class Agent : MonoBehaviour
     private bool _hasBall;
     public bool hasBall
     {
-        get { return _hasBall; }
+        // get { return _hasBall; }
+        get { return _ball; }
     }
 
     private float _linearSpeed;
@@ -53,16 +54,23 @@ public class Agent : MonoBehaviour
 
     [SerializeField]
     private Rigidbody _rb;
-    [SerializeField]
-    private SpringJoint _springJoint;
-    [SerializeField]
-    private float _spring = 5;
+    // [SerializeField]
+    // private SpringJoint _springJoint;
+    // [SerializeField]
+    // private float _spring = 5;
     [SerializeField]
     private MeshRenderer _meshRenderer;
 
     private Boundaries _boundaries;
     [SerializeField]
     private float _maxDistanceToBoundaries = 2;
+    public Ball _ball; // TODO change
+    [SerializeField]
+    private float _throwForce = 15;
+    public float throwForce
+    {
+        get { return _throwForce; }
+    }
 
     void Start()
     {
@@ -78,12 +86,12 @@ public class Agent : MonoBehaviour
             _rb = GetComponent<Rigidbody>();
         }
 
-        if (!_springJoint)
-        {
-            _springJoint = GetComponent<SpringJoint>();
-        }
+        // if (!_springJoint)
+        // {
+        //     _springJoint = GetComponent<SpringJoint>();
+        // }
 
-        _springJoint.spring = 0;
+        // _springJoint.spring = 0;
 
         if (!_meshRenderer)
         {
@@ -261,26 +269,34 @@ public class Agent : MonoBehaviour
         Stop();
     }
 
-    public void Pickup(Rigidbody ball)
+    public void Pickup(Rigidbody ballRB)
     {
-        _springJoint.spring = _spring;
-        _springJoint.connectedBody = ball;
-        _hasBall = true;
-        tookball();
+        Ball ball = ballRB.GetComponent<Ball>();
+
+        // _springJoint.spring = _spring;
+        // _springJoint.connectedBody = ballRB;
+        // _hasBall = true;
+        if (ball)
+        {
+            _ball = ball;
+            tookball();
+        }
     }
 
-    public void Throw()
+    public void Throw(Transform target)
     {
         Debug.Log("THROWING");
 
-        Ball ball = _springJoint.connectedBody.GetComponent<Ball>();
+        // Ball ball = _springJoint.connectedBody.GetComponent<Ball>();
 
-        if (ball)
+        if (_ball)
         {
-            _springJoint.connectedBody = null;
-            _springJoint.spring = 0;
-            _hasBall = false;
-            ball.Throw();
+            // _springJoint.connectedBody = null;
+            // _springJoint.spring = 0;
+            // _hasBall = false;
+
+            _ball.Throw(target, throwForce);
+            _ball = null;
         }
     }
 
@@ -288,16 +304,20 @@ public class Agent : MonoBehaviour
     {
         if (coll.gameObject.tag == GameController.Tags.Ball.ToString())
         {
-            Rigidbody ball = coll.gameObject.GetComponent<Rigidbody>();
+            Rigidbody ballRB = coll.gameObject.GetComponent<Rigidbody>();
+            Ball ball = coll.gameObject.GetComponent<Ball>();
 
-            if (ball)
+            if (ballRB & ball)
             {
                 if (debugMode)
                 {
                     Supporting.Log(string.Format("{0} picked up {1}", name, ball.name));
                 }
 
-                Pickup(ball);
+                if (!ball.thrown)
+                {
+                    Pickup(ballRB);
+                }
             }
         }
     }
