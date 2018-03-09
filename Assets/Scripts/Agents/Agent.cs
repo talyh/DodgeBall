@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-// [RequireComponent(typeof(SpringJoint))]
 [RequireComponent(typeof(MeshRenderer))]
 public class Agent : MonoBehaviour
 {
     public delegate void TookBall();
     public event TookBall tookball;
+
+    public delegate void GotHit();
+    public event GotHit gotHit;
 
     public bool debugMode;
 
@@ -17,13 +19,6 @@ public class Agent : MonoBehaviour
     public GameController.Teams team
     {
         get { return _team; }
-    }
-
-    private bool _hasBall;
-    public bool hasBall
-    {
-        // get { return _hasBall; }
-        get { return _ball; }
     }
 
     private float _linearSpeed;
@@ -54,44 +49,55 @@ public class Agent : MonoBehaviour
 
     [SerializeField]
     private Rigidbody _rb;
-    // [SerializeField]
-    // private SpringJoint _springJoint;
-    // [SerializeField]
-    // private float _spring = 5;
     [SerializeField]
     private MeshRenderer _meshRenderer;
 
     private Boundaries _boundaries;
     [SerializeField]
     private float _maxDistanceToBoundaries = 2;
+
     public Ball _ball; // TODO change
+    public Ball ball
+    {
+        get { return _ball; }
+    }
+    public bool hasBall
+    {
+        get { return _ball; }
+    }
+
     [SerializeField]
     private float _throwForce = 15;
     public float throwForce
     {
         get { return _throwForce; }
     }
+    [SerializeField]
+    private Transform _outArea;
+    public Transform outArea
+    {
+        get { return _outArea; }
+    }
 
-    void Start()
+    public bool _hit;
+    public bool hit
+    {
+        get { return _hit; }
+    }
+
+    private void Start()
     {
         EnrollInTeam();
         Setup();
         DetermineAgentColor();
     }
 
-    void Setup()
+    private void Setup()
     {
         if (!_rb)
         {
             _rb = GetComponent<Rigidbody>();
         }
-
-        // if (!_springJoint)
-        // {
-        //     _springJoint = GetComponent<SpringJoint>();
-        // }
-
-        // _springJoint.spring = 0;
 
         if (!_meshRenderer)
         {
@@ -104,7 +110,7 @@ public class Agent : MonoBehaviour
         _boundaries = GameController.instance.GetTeamBoundaries(this);
     }
 
-    void DetermineAgentColor()
+    private void DetermineAgentColor()
     {
         switch (_team)
         {
@@ -130,21 +136,27 @@ public class Agent : MonoBehaviour
         GameController.instance.EnrollTeamMember(this);
     }
 
-    private void LateUpdate()
+    private void Update()
     {
-        Contain();
-    }
-
-    private void Contain()
-    {
-        if (GoingOut())
+        if (_hit)
         {
-            Stop();
-            TurnBack();
+            return;
+        }
+
+        if (_ball)
+        {
+            Vector3 offset = _ball.transform.position - transform.position;
+            _ball.Carry(transform, offset);
+        }
+
+        if (team == GameController.Teams.Red)
+        {
+            Debug.Log(Time.frameCount + ">> " + name + " ball: " + _ball);
+            Debug.Log(Time.frameCount + ">> " + name + " hit: " + _hit);
         }
     }
 
-    private bool GoingOut()
+    public bool GoingOut()
     {
         float x = transform.position.x + transform.forward.x;
         float z = transform.position.z + transform.forward.z;
@@ -171,20 +183,6 @@ public class Agent : MonoBehaviour
         _rb.velocity = transform.forward * _linearSpeed;
     }
 
-    public void MoveBackwards()
-    {
-        _rb.velocity = -transform.forward * _linearSpeed;
-    }
-
-    public void StrafeRight()
-    {
-        _rb.velocity = transform.right * _linearSpeed;
-    }
-
-    public void StrafeLeft()
-    {
-        _rb.velocity = -transform.right * _linearSpeed;
-    }
 
     public void TurnRight()
     {
@@ -217,106 +215,80 @@ public class Agent : MonoBehaviour
         StopTurning();
     }
 
-    public int Wander()
-    {
-        int action = Random.Range(0, 100);
-
-        if (debugMode)
-        {
-            Supporting.Log(string.Format("{0} decided to {1}", name, action));
-        }
-
-        Wander(action);
-
-        return action;
-    }
-
-    public void Wander(int action)
-    {
-        if (action >= 0 && action <= 20)
-        {
-            MoveForwards();
-        }
-        else if (action > 20 && action <= 40)
-        {
-            MoveBackwards();
-        }
-        else if (action > 40 && action <= 60)
-        {
-            StrafeLeft();
-        }
-        else if (action > 60 && action <= 80)
-        {
-            StrafeRight();
-        }
-        else if (action > 80 && action <= 85)
-        {
-            TurnRight();
-        }
-        else if (action > 85 && action <= 90)
-        {
-            TurnRight();
-        }
-        else if (action > 90)
-        {
-            Stop();
-        }
-    }
-
     public void GoOut()
     {
-        Supporting.Log(string.Format("{0} is out", name));
-        Stop();
+        if (_hit)
+        {
+            return;
+        }
+
+        TakeHit();
     }
 
-    public void Pickup(Rigidbody ballRB)
+    public void Pickup(Ball ball)
     {
-        Ball ball = ballRB.GetComponent<Ball>();
+        if (_hit)
+        {
+            return;
+        }
 
-        // _springJoint.spring = _spring;
-        // _springJoint.connectedBody = ballRB;
-        // _hasBall = true;
         if (ball)
         {
             _ball = ball;
             tookball();
+
+            GameController.instance.KeepTrack(ball, this);
         }
     }
 
     public void Throw(Transform target)
     {
-        Debug.Log("THROWING");
-
-        // Ball ball = _springJoint.connectedBody.GetComponent<Ball>();
+        if (_hit)
+        {
+            return;
+        }
 
         if (_ball)
         {
-            // _springJoint.connectedBody = null;
-            // _springJoint.spring = 0;
-            // _hasBall = false;
-
             _ball.Throw(target, throwForce);
             _ball = null;
         }
     }
 
+    public void TakeHit()
+    {
+        _hit = true;
+        gotHit();
+        GameController.instance.RemoveFromTeam(this);
+    }
+
     private void OnCollisionEnter(Collision coll)
     {
+        if (_hit)
+        {
+            return;
+        }
+
         if (coll.gameObject.tag == GameController.Tags.Ball.ToString())
         {
-            Rigidbody ballRB = coll.gameObject.GetComponent<Rigidbody>();
             Ball ball = coll.gameObject.GetComponent<Ball>();
 
-            if (ballRB & ball)
+            if (ball)
             {
                 if (debugMode)
                 {
                     Supporting.Log(string.Format("{0} picked up {1}", name, ball.name));
                 }
 
-                if (!ball.thrown)
+                if (!ball.thrown && !ball.taken && !hasBall)
                 {
-                    Pickup(ballRB);
+                    Debug.LogWarning(Time.frameCount + ">> Agent " + name + " picked ball");
+                    Pickup(ball);
+                }
+                else if (ball != _ball && this != GameController.instance.WhoThrewBall(ball))
+                {
+                    Debug.LogWarning(Time.frameCount + ">> Agent " + name + " hit");
+                    TakeHit();
                 }
             }
         }

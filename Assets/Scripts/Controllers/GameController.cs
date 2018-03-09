@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameController : Singleton<GameController>
 {
-    public enum Teams { None = -1, Red = 0, Blue }
+    public enum Teams { None = -1, Red = 0, Blue, Out }
     public enum Tags { Ball = 0, Agent, MiddleLine }
     public enum Layers { Ball, Agent }
 
@@ -44,6 +44,8 @@ public class GameController : Singleton<GameController>
         get { return CheckTeamWithBall(); }
     }
 
+    private Dictionary<Ball, Agent> _balls;
+
 
     private void Start()
     {
@@ -60,6 +62,11 @@ public class GameController : Singleton<GameController>
         if (_blueTeam == null)
         {
             _blueTeam = new List<Agent>();
+        }
+
+        if (_balls == null)
+        {
+            _balls = new Dictionary<Ball, Agent>();
         }
     }
 
@@ -116,6 +123,36 @@ public class GameController : Singleton<GameController>
         }
     }
 
+    public void RemoveFromTeam(Agent teamMember)
+    {
+        switch (teamMember.team)
+        {
+            case Teams.Red:
+                if (CheckTeamForMember(teamMember, ref _redTeam))
+                {
+                    _redTeam.Remove(teamMember);
+                }
+                else
+                {
+                    Supporting.Log(string.Format("{0} cannot be found on Red Team. Couldn't Remove.", teamMember.gameObject), 1);
+                }
+                break;
+            case Teams.Blue:
+                if (CheckTeamForMember(teamMember, ref _blueTeam))
+                {
+                    _blueTeam.Remove(teamMember);
+                }
+                else
+                {
+                    Supporting.Log(string.Format("{0} cannot be found on Blue Team. Couldn't Remove.", teamMember.gameObject), 1);
+                }
+                break;
+            default:
+                Supporting.Log(string.Format("Couldn't determine team for {0}", teamMember.gameObject), 1);
+                break;
+        }
+    }
+
     private bool CheckTeamForMember(Agent teamMember, ref List<Agent> team)
     {
         if (team == null)
@@ -154,5 +191,35 @@ public class GameController : Singleton<GameController>
         }
 
         return Teams.None;
+    }
+
+    public bool CheckBallIsTaken(Ball ball)
+    {
+        List<Agent> combined = _blueTeam;
+        combined.Concat(_redTeam);
+
+        return combined.Exists(agent => agent.ball == ball);
+    }
+
+    public void KeepTrack(Ball ball, Agent agent)
+    {
+        if (_balls == null)
+        {
+            _balls = new Dictionary<Ball, Agent>();
+        }
+
+        if (!_balls.ContainsKey(ball))
+        {
+            _balls.Add(ball, agent);
+        }
+        else
+        {
+            _balls[ball] = agent;
+        }
+    }
+
+    public Agent WhoThrewBall(Ball ball)
+    {
+        return _balls[ball];
     }
 }

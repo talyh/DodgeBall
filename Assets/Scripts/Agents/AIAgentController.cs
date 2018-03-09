@@ -27,17 +27,7 @@ public class AIAgentController : MonoBehaviour
     [SerializeField]
     private float _destinationBuffer = 5;
 
-    // private bool _alignedToTarget = false;
-
     private List<Vector3> _pathNodes;
-
-    // private bool _movingToTarget;
-
-    private bool _wandering;
-    private int _wanderingAction;
-    private float _timeWandering;
-    [SerializeField]
-    private float _maxTimeWandering;
 
     [Header("Engaging")]
     [SerializeField]
@@ -45,6 +35,7 @@ public class AIAgentController : MonoBehaviour
     [SerializeField]
     private float _maxThrowingDistance = 8;
 
+    private bool _waiting;
 
     private void Start()
     {
@@ -57,7 +48,9 @@ public class AIAgentController : MonoBehaviour
         {
             _agent = GetComponent<Agent>();
         }
+
         _agent.tookball += ClearTarget;
+        _agent.gotHit += GoOut;
 
         DetermineWalkMask();
 
@@ -67,6 +60,12 @@ public class AIAgentController : MonoBehaviour
     private void DetermineWalkMask()
     {
         _courtAreaMask = 1 << NavMesh.GetAreaFromName(_agent.team.ToString());
+
+        if (_agent.hit)
+        {
+            _courtAreaMask = 1 << NavMesh.GetAreaFromName(GameController.Teams.Out.ToString())
+                | 1 << NavMesh.GetAreaFromName(_agent.team.ToString());
+        }
     }
 
     private void DetermineScanMask()
@@ -100,6 +99,11 @@ public class AIAgentController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (_waiting)
+        {
+            return;
+        }
+
         if (_agent.debugMode)
         {
             Supporting.Log(string.Format("{0} is at {1}", name, transform.position));
@@ -108,51 +112,56 @@ public class AIAgentController : MonoBehaviour
         if (_target)
         {
             MoveToTarget();
-            DetermineThorw();
+
+            if (_agent.hasBall && _target && !_agent.hit)
+            {
+                DetermineThorw();
+            }
         }
         else
         {
-            Scan();
+            if (!_agent.hit)
+            {
+                Scan();
+            }
         }
 
         if (!_target)
         {
-            NavMeshPath path = new NavMeshPath();
+            Wander();
+        }
 
-            Vector3 origin = _agent.transform.position;
-            Vector3 destination = transform.TransformPoint(_agent.transform.forward);
-
-            bool pathForward = NavMesh.CalculatePath(origin, destination, _courtAreaMask, path);
-
-            if (!pathForward)
-            {
-                if (_agent.debugMode)
-                {
-                    Supporting.Log(string.Format("{0} couldn't find a path forward from {1} to {2} in area {3}",
-                            name, origin, destination, Supporting.GetNavMeshIndex(_courtAreaMask), 2));
-                }
-
-                return;
-            }
-
-            if (!_wandering || _timeWandering >= _maxTimeWandering)
-            {
-                _agent.Stop();
-                _wanderingAction = _agent.Wander();
-                _wandering = true;
-                _timeWandering = 0;
-            }
-            else
-            {
-                _agent.Wander(_wanderingAction);
-                _timeWandering += Time.deltaTime;
-            }
+        if (_agent.GoingOut() && !_agent.hit)
+        {
+            _agent.Stop();
         }
     }
 
     private void MoveToTarget()
     {
-        DeterminePath(_target.position);
+        if (_agent.hit)
+        {
+            DetermineWalkMask();
+        }
+
+        if (_target.GetComponent<Ball>() || _agent.hit)
+        {
+            DeterminePath(_target.position);
+        }
+        else
+        {
+            Vector3 throwPosition = _target.position;
+            throwPosition.x -= _minThrowingDistance;
+            throwPosition.y = 0;
+            throwPosition.z -= _minThrowingDistance;
+
+            DeterminePath(throwPosition);
+
+            if (_agent.debugMode)
+            {
+                Supporting.Log(string.Format("{0} decided to move to {1} to throw at {2}", name, throwPosition, _target.name));
+            }
+        }
 
         if (_pathNodes.Count > 0)
         {
@@ -197,9 +206,6 @@ public class AIAgentController : MonoBehaviour
     {
         destination.y = transform.position.y;
 
-        // Vector3 toDestination = destination - transform.position;
-        // float distanceToDestination = toDestination.magnitude;
-
         float distance = Vector3.Distance(destination, transform.position);
 
         if (distance < _destinationBuffer)
@@ -211,27 +217,64 @@ public class AIAgentController : MonoBehaviour
 
             _pathNodes.Remove(destination);
 
-            if (_pathNodes.Count <= 1)
+            Vector3 finalDestination = _pathNodes[_pathNodes.Count - 1];
+            distance = Vector3.Distance(transform.position, finalDestination);
+
+            if (_agent.debugMode)
             {
-                _agent.Stop();
-                _target = null;
+                Supporting.Log(string.Format("{0}'s final destination {1} is at {2} away", name, finalDestination, distance));
             }
 
-            return;
+            if (distance <= _destinationBuffer)
+            {
+                _agent.Stop();
+                if (_target)
+                {
+                    Ball ball = _target.GetComponent<Ball>();
+                    if (ball)
+                    {
+                        if (_agent.debugMode)
+                        {
+                            Supporting.Log(string.Format("{0} picked up {1}", name, ball.name));
+                        }
+
+                        _agent.Pickup(ball);
+                        _target = null;
+                    }
+                    else if (_target == _agent.outArea)
+                    {
+                        if (_agent.debugMode)
+                        {
+                            Supporting.Log(string.Format("{0} arrived at {1}", name, _agent.outArea.name));
+                        }
+
+                        this.enabled = false;
+                    }
+                    else
+                    {
+                        if (_agent.debugMode)
+                        {
+                            Supporting.Log(string.Format("{0} distance to {1} is {2}", name, finalDestination, distance));
+                        }
+                    }
+                }
+
+                return;
+            }
         }
 
         if (_agent.debugMode)
         {
-            Supporting.Log(string.Format("{0} navigating to: {1} -  distance: {1}", name, destination, distance));
+            Supporting.Log(string.Format("{0} navigating to: {1} -  distance: {2}", name, destination, distance));
         }
 
         Vector3 toDestination = destination - transform.position;
         toDestination.Normalize();
-        // float lookAtToDestinationDot = Vector3.Dot(transform.forward, toDestination);
+        float lookAtToDestinationDot = Vector3.Dot(transform.forward, toDestination);
         float rightToDestinationDot = Vector3.Dot(transform.right, toDestination);
-        // float toDestinationAngle = Mathf.Rad2Deg * Mathf.Acos(lookAtToDestinationDot);
 
         bool shouldTurnRight = rightToDestinationDot > Mathf.Epsilon;
+
         if (shouldTurnRight)
         {
             _agent.TurnRight();
@@ -244,11 +287,38 @@ public class AIAgentController : MonoBehaviour
         _agent.MoveForwards();
     }
 
+    private void Wander()
+    {
+        MoveToPoint(GenerateRandomPoint());
+    }
+
+    public Vector3 GenerateRandomPoint()
+    {
+        Vector3 randomDirection = Random.insideUnitSphere * 10;
+        randomDirection.y = 0;
+        randomDirection += transform.position;
+        NavMeshHit navHit;
+        NavMesh.SamplePosition(randomDirection, out navHit, 10, _courtAreaMask);
+
+        Vector3 point = navHit.position;
+
+        DeterminePath(point);
+
+        if (_pathNodes.Count > 0)
+        {
+            return point;
+        }
+        else
+        {
+            return GenerateRandomPoint();
+        }
+    }
+
     private void Scan()
     {
         DetermineScanMask();
 
-        // if my team has the ball, don't bother scanning for it
+        // if I'm looking for ball and my team has the it, don't bother looking anymore
         if (_currentScanLayer == LayerMask.NameToLayer(GameController.Layers.Ball.ToString()) &&
             GameController.instance.teamWithBall == _agent.team)
         {
@@ -276,7 +346,6 @@ public class AIAgentController : MonoBehaviour
                     }
 
                     _target = coll.transform;
-                    _wandering = false;
 
                     if (_agent.debugMode)
                     {
@@ -308,19 +377,21 @@ public class AIAgentController : MonoBehaviour
     {
         _agent.Throw(_target);
         _target = null;
+        _agent.Stop();
+        StartCoroutine(WaitABit(3));
     }
 
-    private void OnTriggerEnter(Collider coll)
+    private IEnumerator WaitABit(float seconds)
     {
-        if (_agent.debugMode)
-        {
-            Supporting.Log(string.Format("{0} triggered {1}", name, coll.name));
-        }
+        _waiting = true;
+        yield return new WaitForSeconds(seconds);
+        _waiting = false;
+    }
 
-        if (coll.gameObject.tag == GameController.Tags.MiddleLine.ToString())
-        {
-            _agent.GoOut();
-        }
+    private void GoOut()
+    {
+        _agent.Stop();
+        _target = _agent.outArea;
     }
 
     private void OnDrawGizmos()
@@ -334,7 +405,7 @@ public class AIAgentController : MonoBehaviour
             {
                 foreach (Vector3 position in _pathNodes)
                 {
-                    Gizmos.DrawCube(position, new Vector3(1, 1, 1));
+                    Gizmos.DrawSphere(position, 0.3f);
                 }
             }
         }
@@ -343,5 +414,6 @@ public class AIAgentController : MonoBehaviour
     private void OnDisable()
     {
         _agent.tookball -= ClearTarget;
+        _agent.gotHit -= GoOut;
     }
 }

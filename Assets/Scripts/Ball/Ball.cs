@@ -1,76 +1,4 @@
-﻿// using System.Collections;
-// using System.Collections.Generic;
-// using UnityEngine;
-
-
-// [RequireComponent(typeof(Rigidbody))]
-// [RequireComponent(typeof(SphereCollider))]
-// public class Ball : MonoBehaviour
-// {
-//     public bool debugMode;
-
-//     private Vector3 _spawnPosition;
-
-//     [SerializeField]
-//     private Rigidbody _rb = null;
-//     [SerializeField]
-//     private float _throwForce = 4;
-
-//     public bool _thrown;
-//     public bool thrown
-//     {
-//         get { return _thrown; }
-//     }
-//     public Transform _target; // TODO change
-
-//     private void Start()
-//     {
-//         Setup();
-//     }
-
-//     private void Setup()
-//     {
-//         if (!_rb)
-//         {
-//             _rb = GetComponent<Rigidbody>();
-//         }
-
-//         _spawnPosition = transform.position;
-//     }
-
-//     private void Update()
-//     {
-//     }
-
-//     
-
-//     Vector3 CalculateInitialVelocity(Vector3 targetPosition, float desiredAirTime)
-//     {
-//         Vector3 displacement = targetPosition - transform.position;
-//         float yDisplacement = displacement.y;
-//         displacement.y = 0.0f;
-
-//         float horizontalDisplacement = displacement.magnitude;
-//         if (horizontalDisplacement < Mathf.Epsilon)
-//         {
-//             return Vector3.zero;
-//         }
-
-//         float horizontalSpeed = horizontalDisplacement / desiredAirTime;
-
-//         float time = horizontalDisplacement / horizontalSpeed;
-//         time *= 0.5f;
-//         Vector3 initialYVelocity = Physics.gravity * time * -1.0f;
-//         displacement.Normalize();
-//         Vector3 initialHorizontalVelocity = displacement * horizontalSpeed;
-//         return initialHorizontalVelocity + initialYVelocity;
-//     }
-
-//     
-// }
-
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -82,12 +10,17 @@ public class Ball : MonoBehaviour
         get { return _thrown; }
     }
 
+    public bool taken
+    {
+        get { return GameController.instance.CheckBallIsTaken(this); }
+    }
+
     private Vector3 _spawnPosition;
 
     private Rigidbody _rb = null;
 
-    public Transform _target;
-    public float _desiredAirTime = 1.0f;
+    private Transform _target;
+    private float _desiredAirTime = 1.0f;
 
     private void Start()
     {
@@ -102,6 +35,12 @@ public class Ball : MonoBehaviour
         }
 
         _spawnPosition = transform.position;
+        GameController.instance.KeepTrack(this, null);
+    }
+
+    public void Carry(Transform agent, Vector3 offset)
+    {
+        transform.position = agent.position + offset;
     }
 
     public void Throw(Transform target, float throwForce)
@@ -111,6 +50,7 @@ public class Ball : MonoBehaviour
             _thrown = true;
             Stop();
             _target = target;
+            _target.GetComponent<Agent>().gotHit += Hit;
             _desiredAirTime = 60 / throwForce;
             _rb.velocity = CalculateInitialVelocityMovingTarget();
         }
@@ -167,13 +107,28 @@ public class Ball : MonoBehaviour
         return initialHorizontalVelocity + initialYVelocity;
     }
 
+    private void Hit()
+    {
+        _thrown = false;
+        _target.GetComponent<Agent>().gotHit -= Hit;
+        _target = null;
+    }
+
     private void OnCollisionEnter(Collision coll)
     {
         Stop();
 
-        if (_thrown)
+        if (coll.gameObject.tag != GameController.Tags.Agent.ToString())
         {
             _thrown = false;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_target)
+        {
+            _target.GetComponent<Agent>().gotHit -= Hit;
         }
     }
 }
