@@ -56,7 +56,7 @@ public class GameController : Singleton<GameController>
 
     private Dictionary<Ball, Agent> _balls;
 
-
+    private Dictionary<Teams, int> _scores;
 
 
     private void Start()
@@ -79,6 +79,11 @@ public class GameController : Singleton<GameController>
         if (_balls == null)
         {
             _balls = new Dictionary<Ball, Agent>();
+        }
+
+        if (_scores == null)
+        {
+            _scores = new Dictionary<Teams, int>();
         }
     }
 
@@ -143,6 +148,7 @@ public class GameController : Singleton<GameController>
                 if (CheckTeamForMember(teamMember, ref _redTeam))
                 {
                     _redTeam.Remove(teamMember);
+                    SetScore(Teams.Blue, TEAM_SIZE - _redTeam.Count);
                 }
                 else
                 {
@@ -153,6 +159,7 @@ public class GameController : Singleton<GameController>
                 if (CheckTeamForMember(teamMember, ref _blueTeam))
                 {
                     _blueTeam.Remove(teamMember);
+                    SetScore(Teams.Red, TEAM_SIZE - _blueTeam.Count);
                 }
                 else
                 {
@@ -163,6 +170,20 @@ public class GameController : Singleton<GameController>
                 Supporting.Log(string.Format("Couldn't determine team for {0}", teamMember.gameObject), 1);
                 break;
         }
+    }
+
+    private void SetScore(Teams team, int score)
+    {
+        if (_scores.ContainsKey(team))
+        {
+            _scores[team] = score;
+        }
+        else
+        {
+            _scores.Add(team, score);
+        }
+
+        CanvasController.instance.SetScore(team, score);
     }
 
     private bool CheckTeamForMember(Agent teamMember, ref List<Agent> team)
