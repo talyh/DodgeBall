@@ -146,6 +146,7 @@ public class Agent : MonoBehaviour
         if (_ball)
         {
             Vector3 offset = _ball.transform.position - transform.position;
+            offset.y = transform.position.y;
             _ball.Carry(transform, offset);
         }
     }
@@ -170,8 +171,6 @@ public class Agent : MonoBehaviour
         }
 
         return false;
-
-        // return GameController.instance.GoingOut(transform, _boundaries, _maxDistanceToBoundaries);
     }
 
     public void MoveForwards()
@@ -218,6 +217,8 @@ public class Agent : MonoBehaviour
             return;
         }
 
+        Debug.LogWarning(Time.frameCount + " >> " + name + " OUT");
+
         TakeHit();
     }
 
@@ -227,6 +228,8 @@ public class Agent : MonoBehaviour
         {
             return;
         }
+
+        // Debug.Break();
 
         if (ball)
         {
@@ -253,9 +256,14 @@ public class Agent : MonoBehaviour
 
     public void TakeHit()
     {
-        _hit = true;
-        gotHit();
-        GameController.instance.RemoveFromTeam(this);
+        if (!_hit)
+        {
+            _hit = true;
+            gotHit();
+            GameController.instance.RemoveFromTeam(this);
+            SetMaterial(GameController.instance.defaultMaterial);
+            Debug.LogWarning(Time.frameCount + " >> " + name + " HIT");
+        }
     }
 
     private void OnCollisionEnter(Collision coll)
@@ -280,7 +288,7 @@ public class Agent : MonoBehaviour
                 {
                     Pickup(ball);
                 }
-                else if (ball != _ball && this != GameController.instance.WhoThrewBall(ball))
+                else if (ball != _ball && this.team != GameController.instance.WhoThrewBall(ball).team)
                 {
                     TakeHit();
                 }

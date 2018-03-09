@@ -47,12 +47,14 @@ public class Ball : MonoBehaviour
     public void Carry(Transform agent, Vector3 offset)
     {
         transform.position = agent.position + offset;
+        _rb.isKinematic = true;
     }
 
     public void Throw(Transform target, float throwForce)
     {
         if (!_thrown)
         {
+            _rb.isKinematic = false;
             _thrown = true;
             Stop();
             _target = target;
@@ -66,6 +68,7 @@ public class Ball : MonoBehaviour
     {
         Stop();
         transform.position = _spawnPosition;
+        _thrown = false;
         // TODO consider scoring against the team that lead the nall to go out
     }
 
@@ -116,9 +119,17 @@ public class Ball : MonoBehaviour
 
     private void Hit()
     {
-        _thrown = false;
-        _target.GetComponent<Agent>().gotHit -= Hit;
-        _target = null;
+        if (_target)
+        {
+            _thrown = false;
+
+            Debug.Log(Time.frameCount + " >> target: " + _target);
+            Debug.Log(Time.frameCount + ">> agent: " + _target.GetComponent<Agent>());
+            Debug.Break();
+
+            _target.GetComponent<Agent>().gotHit -= Hit;
+            _target = null;
+        }
     }
 
     private void OnCollisionEnter(Collision coll)

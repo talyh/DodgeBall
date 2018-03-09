@@ -134,6 +134,7 @@ public class AIAgentController : MonoBehaviour
         if (_agent.GoingOut() && !_agent.hit)
         {
             _agent.Stop();
+            _agent.TurnBack();
         }
     }
 

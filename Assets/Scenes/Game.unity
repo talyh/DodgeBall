@@ -263,6 +263,11 @@ Prefab:
       propertyPath: _destinationBuffer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: _maxDistanceToBoundaries
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
   m_IsPrefabParent: 0
@@ -333,6 +338,11 @@ Prefab:
         type: 2}
       propertyPath: debugMode
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: _maxDistanceToBoundaries
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
@@ -438,50 +448,14 @@ Prefab:
       propertyPath: debugMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: _maxDistanceToBoundaries
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
   m_IsPrefabParent: 0
---- !u!1 &597666912
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 597666913}
-  - component: {fileID: 597666914}
-  m_Layer: 0
-  m_Name: MiddleLine
-  m_TagString: MiddleLine
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &597666913
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 597666912}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.5, z: 0}
-  m_LocalScale: {x: 10, y: 5, z: 0.1}
-  m_Children: []
-  m_Father: {fileID: 1621857413}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &597666914
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 597666912}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &651071672
 Prefab:
   m_ObjectHideFlags: 0
@@ -544,6 +518,11 @@ Prefab:
         type: 2}
       propertyPath: debugMode
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: _maxDistanceToBoundaries
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
@@ -643,6 +622,11 @@ Prefab:
         type: 2}
       propertyPath: debugMode
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: _maxDistanceToBoundaries
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 0}
@@ -851,6 +835,11 @@ Prefab:
       propertyPath: _destinationBuffer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: _maxDistanceToBoundaries
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
   m_IsPrefabParent: 0
@@ -918,7 +907,7 @@ MonoBehaviour:
   _redTeamArea: {fileID: 1613475231}
   _blueTeamMaterial: {fileID: 2100000, guid: 5960e2e52d964490e80a6a13631a1622, type: 2}
   _blueTeamArea: {fileID: 815377561}
-  _defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 3}
+  _defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!4 &1078202746
 Transform:
   m_ObjectHideFlags: 0
@@ -1215,7 +1204,6 @@ Transform:
   - {fileID: 815377561}
   - {fileID: 290111988}
   - {fileID: 929807045}
-  - {fileID: 597666913}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1291,6 +1279,11 @@ Prefab:
         type: 2}
       propertyPath: _destinationBuffer
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: _maxDistanceToBoundaries
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
@@ -1536,6 +1529,11 @@ Prefab:
       propertyPath: debugMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114340305289821412, guid: 76ba17574332f46759d12ecef16033e3,
+        type: 2}
+      propertyPath: _maxDistanceToBoundaries
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 76ba17574332f46759d12ecef16033e3, type: 2}
   m_IsPrefabParent: 0
@@ -1620,7 +1618,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2032480498}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -14.91, y: 1, z: -16.2}
+  m_LocalPosition: {x: -14.91, y: 1, z: 26.9}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 0}
