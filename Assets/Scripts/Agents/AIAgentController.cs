@@ -259,6 +259,8 @@ public class AIAgentController : MonoBehaviour
                         NavMeshObstacle obstacle = gameObject.GetComponent<NavMeshObstacle>();
                         obstacle.carving = true;
 
+                        _agent.GoOut();
+
                         this.enabled = false;
                     }
                     else
@@ -367,7 +369,7 @@ public class AIAgentController : MonoBehaviour
 
     private bool ValidTarget(Agent agent)
     {
-        if (agent.team == _agent.team)
+        if (agent.team == _agent.team || agent.team == GameController.Teams.Out)
         {
             return false;
         }

@@ -13,7 +13,7 @@ public class CourtBounds : MonoBehaviour
         }
         else if (coll.gameObject.tag == GameController.Tags.Agent.ToString())
         {
-            coll.GetComponent<Agent>().GoOut();
+            coll.GetComponent<Agent>().CrossLine();
         }
     }
 }

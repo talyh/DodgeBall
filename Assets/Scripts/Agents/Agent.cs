@@ -210,7 +210,7 @@ public class Agent : MonoBehaviour
         StopTurning();
     }
 
-    public void GoOut()
+    public void CrossLine()
     {
         if (_hit)
         {
@@ -259,6 +259,13 @@ public class Agent : MonoBehaviour
             GameController.instance.RemoveFromTeam(this);
             SetMaterial(GameController.instance.defaultMaterial);
         }
+    }
+
+    public void GoOut()
+    {
+        Stop();
+        _rb.isKinematic = true;
+        _team = GameController.Teams.Out;
     }
 
     private void OnCollisionEnter(Collision coll)
