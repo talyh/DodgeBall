@@ -217,8 +217,6 @@ public class Agent : MonoBehaviour
             return;
         }
 
-        Debug.LogWarning(Time.frameCount + " >> " + name + " OUT");
-
         TakeHit();
     }
 
@@ -228,8 +226,6 @@ public class Agent : MonoBehaviour
         {
             return;
         }
-
-        // Debug.Break();
 
         if (ball)
         {
@@ -262,7 +258,6 @@ public class Agent : MonoBehaviour
             gotHit();
             GameController.instance.RemoveFromTeam(this);
             SetMaterial(GameController.instance.defaultMaterial);
-            Debug.LogWarning(Time.frameCount + " >> " + name + " HIT");
         }
     }
 

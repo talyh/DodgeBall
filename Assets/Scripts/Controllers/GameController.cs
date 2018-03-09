@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameController : Singleton<GameController>
 {
-    // public bool debugMode;
+    public const int TEAM_SIZE = 4;
 
     public enum Teams { None = -1, Red = 0, Blue, Out }
     public enum Tags { Ball = 0, Agent, MiddleLine }
@@ -55,6 +55,8 @@ public class GameController : Singleton<GameController>
     }
 
     private Dictionary<Ball, Agent> _balls;
+
+
 
 
     private void Start()
@@ -231,5 +233,18 @@ public class GameController : Singleton<GameController>
     public Agent WhoThrewBall(Ball ball)
     {
         return _balls[ball];
+    }
+
+    public int RemainingTeamCount(Agent agent)
+    {
+        switch (agent.team)
+        {
+            case Teams.Red:
+                return _redTeam.Count;
+            case Teams.Blue:
+                return _blueTeam.Count;
+            default:
+                return -1;
+        }
     }
 }

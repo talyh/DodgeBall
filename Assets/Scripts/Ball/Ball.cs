@@ -122,11 +122,6 @@ public class Ball : MonoBehaviour
         if (_target)
         {
             _thrown = false;
-
-            Debug.Log(Time.frameCount + " >> target: " + _target);
-            Debug.Log(Time.frameCount + ">> agent: " + _target.GetComponent<Agent>());
-            Debug.Break();
-
             _target.GetComponent<Agent>().gotHit -= Hit;
             _target = null;
         }

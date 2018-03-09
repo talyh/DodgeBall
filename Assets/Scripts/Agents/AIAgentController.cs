@@ -143,9 +143,11 @@ public class AIAgentController : MonoBehaviour
         if (_agent.hit)
         {
             DetermineWalkMask();
+            Vector3 targetPosition = _target.position;
+            targetPosition.z -= (GameController.TEAM_SIZE - GameController.instance.RemainingTeamCount(_agent)) * _agent.transform.localScale.z;
+            DeterminePath(targetPosition);
         }
-
-        if (_target.GetComponent<Ball>() || _agent.hit)
+        else if (_target.GetComponent<Ball>())
         {
             DeterminePath(_target.position);
         }
@@ -185,6 +187,11 @@ public class AIAgentController : MonoBehaviour
     private void DeterminePath(Vector3 target)
     {
         _pathNodes.Clear();
+
+        if (_agent.debugMode)
+        {
+            Supporting.Log(string.Format("{0} attempting to generate path to {1}", name, target));
+        }
 
         NavMeshPath path = new NavMeshPath();
         bool pathFound = NavMesh.CalculatePath(_agent.transform.position, target, _courtAreaMask, path);
@@ -248,6 +255,9 @@ public class AIAgentController : MonoBehaviour
                         {
                             Supporting.Log(string.Format("{0} arrived at {1}", name, _agent.outArea.name));
                         }
+
+                        NavMeshObstacle obstacle = gameObject.GetComponent<NavMeshObstacle>();
+                        obstacle.carving = true;
 
                         this.enabled = false;
                     }
