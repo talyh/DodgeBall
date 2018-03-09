@@ -22,6 +22,12 @@ public class Ball : MonoBehaviour
     private Transform _target;
     private float _desiredAirTime = 1.0f;
 
+    private GameController.Teams _courtSide;
+    public GameController.Teams courtSide
+    {
+        get { return _courtSide; }
+    }
+
     private void Start()
     {
         Setup();
@@ -60,6 +66,7 @@ public class Ball : MonoBehaviour
     {
         Stop();
         transform.position = _spawnPosition;
+        // TODO consider scoring against the team that lead the nall to go out
     }
 
     public void StopMoving()
@@ -129,6 +136,34 @@ public class Ball : MonoBehaviour
         if (_target)
         {
             _target.GetComponent<Agent>().gotHit -= Hit;
+        }
+    }
+
+    void Update()
+    {
+        DetermineCourtSide();
+
+        if (_courtSide == GameController.Teams.Out)
+        {
+            Respawn();
+        }
+    }
+
+    private void DetermineCourtSide()
+    {
+        if (transform.position.z > GameController.instance.redTeamAreaBoundaries.minZ
+            && transform.position.z < GameController.instance.redTeamAreaBoundaries.maxZ)
+        {
+            _courtSide = GameController.Teams.Red;
+        }
+        else if (transform.position.z > GameController.instance.blueTeamAreaBoundaries.minZ
+             && transform.position.z < GameController.instance.blueTeamAreaBoundaries.maxZ)
+        {
+            _courtSide = GameController.Teams.Blue;
+        }
+        else
+        {
+            _courtSide = GameController.Teams.Out;
         }
     }
 }

@@ -148,12 +148,6 @@ public class Agent : MonoBehaviour
             Vector3 offset = _ball.transform.position - transform.position;
             _ball.Carry(transform, offset);
         }
-
-        if (team == GameController.Teams.Red)
-        {
-            Debug.Log(Time.frameCount + ">> " + name + " ball: " + _ball);
-            Debug.Log(Time.frameCount + ">> " + name + " hit: " + _hit);
-        }
     }
 
     public bool GoingOut()
@@ -176,6 +170,8 @@ public class Agent : MonoBehaviour
         }
 
         return false;
+
+        // return GameController.instance.GoingOut(transform, _boundaries, _maxDistanceToBoundaries);
     }
 
     public void MoveForwards()
@@ -282,12 +278,10 @@ public class Agent : MonoBehaviour
 
                 if (!ball.thrown && !ball.taken && !hasBall)
                 {
-                    Debug.LogWarning(Time.frameCount + ">> Agent " + name + " picked ball");
                     Pickup(ball);
                 }
                 else if (ball != _ball && this != GameController.instance.WhoThrewBall(ball))
                 {
-                    Debug.LogWarning(Time.frameCount + ">> Agent " + name + " hit");
                     TakeHit();
                 }
             }

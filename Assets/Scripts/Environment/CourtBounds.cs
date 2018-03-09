@@ -10,7 +10,6 @@ public class CourtBounds : MonoBehaviour
         if (coll.gameObject.tag == GameController.Tags.Ball.ToString())
         {
             coll.GetComponent<Ball>().Respawn();
-            // TODO consider scoring against the team that lead the nall to go out
         }
         else if (coll.gameObject.tag == GameController.Tags.Agent.ToString())
         {

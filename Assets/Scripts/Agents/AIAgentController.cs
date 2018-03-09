@@ -336,26 +336,42 @@ public class AIAgentController : MonoBehaviour
                 if (Vector3.Distance(transform.position, coll.transform.position) > _destinationBuffer)
                 {
                     Agent agent = coll.GetComponent<Agent>();
+                    Ball ball = coll.GetComponent<Ball>();
 
-                    if (agent)
+                    if (agent && ValidTarget(agent) || ball && ValidTarget(ball))
                     {
-                        if (agent.team == _agent.team)
+                        _target = coll.transform;
+
+                        if (_agent.debugMode)
                         {
-                            return;
+                            Supporting.Log(string.Format("{0} locked onto target {1}", name, _target.name));
                         }
+
+                        break;
                     }
-
-                    _target = coll.transform;
-
-                    if (_agent.debugMode)
-                    {
-                        Supporting.Log(string.Format("{0} locked onto target {1}", name, _target.name));
-                    }
-
-                    break;
                 }
             }
         }
+    }
+
+    private bool ValidTarget(Agent agent)
+    {
+        if (agent.team == _agent.team)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool ValidTarget(Ball ball)
+    {
+        if (ball.courtSide != _agent.team)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private void DetermineThorw()

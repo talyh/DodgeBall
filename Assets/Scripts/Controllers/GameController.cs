@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class GameController : Singleton<GameController>
 {
+    // public bool debugMode;
+
     public enum Teams { None = -1, Red = 0, Blue, Out }
     public enum Tags { Ball = 0, Agent, MiddleLine }
     public enum Layers { Ball, Agent }
@@ -19,6 +21,10 @@ public class GameController : Singleton<GameController>
     [SerializeField]
     private Transform _redTeamArea;
     private Boundaries _redTeamAreaBoundaries;
+    public Boundaries redTeamAreaBoundaries
+    {
+        get { return _redTeamAreaBoundaries; }
+    }
 
     private List<Agent> _blueTeam;
     [SerializeField]
@@ -29,8 +35,12 @@ public class GameController : Singleton<GameController>
     }
     [SerializeField]
     private Transform _blueTeamArea;
-    private Boundaries _blueTeamAreaBoundaries;
 
+    private Boundaries _blueTeamAreaBoundaries;
+    public Boundaries blueTeamAreaBoundaries
+    {
+        get { return _blueTeamAreaBoundaries; }
+    }
 
     [SerializeField]
     private Material _defaultMaterial;
