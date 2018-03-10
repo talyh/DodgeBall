@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameController : Singleton<GameController>
 {
-    public const int TEAM_SIZE = 4;
+    public const int TEAM_SIZE = 6;
 
     public enum Teams { None = -1, Red = 0, Blue, Out }
     public enum Tags { Ball = 0, Agent, MiddleLine }
