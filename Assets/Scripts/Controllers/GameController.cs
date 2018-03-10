@@ -268,4 +268,9 @@ public class GameController : Singleton<GameController>
                 return -1;
         }
     }
+
+    public bool BallThrown()
+    {
+        return _balls.Where(entry => entry.Key.thrown).Count() > 0;
+    }
 }

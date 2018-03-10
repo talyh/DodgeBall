@@ -56,7 +56,7 @@ public class Agent : MonoBehaviour
     [SerializeField]
     private float _maxDistanceToBoundaries = 2;
 
-    public Ball _ball; // TODO change
+    public Ball _ball;
     public Ball ball
     {
         get { return _ball; }
@@ -73,6 +73,13 @@ public class Agent : MonoBehaviour
         get { return _throwForce; }
     }
     [SerializeField]
+    private float _minThrowingDistance = 2;
+    public float minThrowingDistance
+    {
+        get { return _minThrowingDistance; }
+    }
+
+    [SerializeField]
     private Transform _outArea;
     public Transform outArea
     {
@@ -83,6 +90,28 @@ public class Agent : MonoBehaviour
     public bool hit
     {
         get { return _hit; }
+    }
+
+    private StateManager _stateManager = new StateManager();
+    public StateManager stateManager
+    {
+        get { return _stateManager; }
+    }
+    public State currentState
+    {
+        get { return _stateManager.currentState; }
+    }
+    [SerializeField]
+    public string CURRENT_TEMP;
+
+    [SerializeField]
+    private AIAgentController _controller;
+
+    [SerializeField]
+    private float _reactionTime = 0.3f;
+    public Transform target
+    {
+        get { return _controller.target; }
     }
 
     private void Start()
@@ -104,10 +133,38 @@ public class Agent : MonoBehaviour
             _meshRenderer = GetComponent<MeshRenderer>();
         }
 
+        if (!_controller)
+        {
+            _controller = GetComponent<AIAgentController>();
+        }
+
         _angularSpeed = _angularMaxSpeed;
         _linearSpeed = _linearMaxSpeed;
 
         _boundaries = GameController.instance.GetTeamBoundaries(this);
+
+        InitializeFSM();
+    }
+
+    private void InitializeFSM()
+    {
+        stateManager.Add(State.States.Wander);
+        stateManager.Add(State.States.Attack);
+        stateManager.Add(State.States.Defend);
+
+        stateManager.Add(new WanderToAttack());
+        stateManager.Add(new AttackToWander());
+        stateManager.Add(new WanderToDefend());
+        stateManager.Add(new DefendToWander());
+
+        stateManager.Add(Condition.Conditions.AgentHasBall);
+        stateManager.Add(Condition.Conditions.AgentHit);
+        stateManager.Add(Condition.Conditions.TargettingOpponent);
+        stateManager.Add(Condition.Conditions.BallThrownByOpponent);
+
+        stateManager.Init(this);
+
+        _stateManager.SetInitialState(State.States.Wander);
     }
 
     private void DetermineAgentColor()
@@ -138,6 +195,8 @@ public class Agent : MonoBehaviour
 
     private void Update()
     {
+        stateManager.Update();
+
         if (_hit)
         {
             return;
@@ -149,6 +208,8 @@ public class Agent : MonoBehaviour
             offset.y = transform.position.y;
             _ball.Carry(transform, offset);
         }
+
+        CURRENT_TEMP = currentState.ToString();
     }
 
     public bool GoingOut()
@@ -236,6 +297,13 @@ public class Agent : MonoBehaviour
         }
     }
 
+    // called by the State Machine
+    public void Throw()
+    {
+        _controller.Throw();
+    }
+
+    // called by the Controller, now with a target to throw at
     public void Throw(Transform target)
     {
         if (_hit)
@@ -266,6 +334,16 @@ public class Agent : MonoBehaviour
         Stop();
         _rb.isKinematic = true;
         _team = GameController.Teams.Out;
+    }
+
+    public void Wander()
+    {
+        _controller.Wander();
+    }
+
+    public void Defend()
+    {
+        _controller.Defend(_reactionTime);
     }
 
     private void OnCollisionEnter(Collision coll)

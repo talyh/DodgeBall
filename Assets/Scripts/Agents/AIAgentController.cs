@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -13,7 +14,11 @@ public class AIAgentController : MonoBehaviour
 
     private int _courtAreaMask;
 
-    public Transform _target; // TODO change
+    public Transform _target;
+    public Transform target
+    {
+        get { return _target; }
+    }
 
     [Header("Scanning")]
     [SerializeField]
@@ -28,12 +33,6 @@ public class AIAgentController : MonoBehaviour
     private float _destinationBuffer = 5;
 
     private List<Vector3> _pathNodes;
-
-    [Header("Engaging")]
-    [SerializeField]
-    private float _minThrowingDistance = 2;
-    [SerializeField]
-    private float _maxThrowingDistance = 8;
 
     private bool _waiting;
 
@@ -112,11 +111,7 @@ public class AIAgentController : MonoBehaviour
         if (_target)
         {
             MoveToTarget();
-
-            if (_agent.hasBall && _target && !_agent.hit)
-            {
-                DetermineThorw();
-            }
+            DetermineThrow();
         }
         else
         {
@@ -147,22 +142,13 @@ public class AIAgentController : MonoBehaviour
             targetPosition.z -= (GameController.TEAM_SIZE - GameController.instance.RemainingTeamCount(_agent)) * _agent.transform.localScale.z;
             DeterminePath(targetPosition);
         }
-        else if (_target.GetComponent<Ball>())
-        {
-            DeterminePath(_target.position);
-        }
         else
         {
-            Vector3 throwPosition = _target.position;
-            throwPosition.x -= _minThrowingDistance;
-            throwPosition.y = 0;
-            throwPosition.z -= _minThrowingDistance;
-
-            DeterminePath(throwPosition);
+            DeterminePath(_target.position);
 
             if (_agent.debugMode)
             {
-                Supporting.Log(string.Format("{0} decided to move to {1} to throw at {2}", name, throwPosition, _target.name));
+                Supporting.Log(string.Format("{0} decided to move to {1} to throw at {2}", name, _target.position, _target.name));
             }
         }
 
@@ -300,18 +286,19 @@ public class AIAgentController : MonoBehaviour
         _agent.MoveForwards();
     }
 
-    private void Wander()
+    public Vector3 GenerateRandomPoint(int counter = 0)
     {
-        MoveToPoint(GenerateRandomPoint());
-    }
+        if (counter > 10)
+        {
+            _agent.Stop();
+            return Vector3.zero;
+        }
 
-    public Vector3 GenerateRandomPoint()
-    {
-        Vector3 randomDirection = Random.insideUnitSphere * 10;
+        Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * 50;
         randomDirection.y = 0;
         randomDirection += transform.position;
         NavMeshHit navHit;
-        NavMesh.SamplePosition(randomDirection, out navHit, 10, _courtAreaMask);
+        NavMesh.SamplePosition(randomDirection, out navHit, 50, _courtAreaMask);
 
         Vector3 point = navHit.position;
 
@@ -323,8 +310,14 @@ public class AIAgentController : MonoBehaviour
         }
         else
         {
-            return GenerateRandomPoint();
+            counter++;
+            return GenerateRandomPoint(counter);
         }
+    }
+
+    public void Wander()
+    {
+        MoveToPoint(GenerateRandomPoint());
     }
 
     private void Scan()
@@ -387,7 +380,7 @@ public class AIAgentController : MonoBehaviour
         return true;
     }
 
-    private void DetermineThorw()
+    private void DetermineThrow()
     {
         if (!_agent.hasBall || _target.tag != GameController.Tags.Agent.ToString())
         {
@@ -396,13 +389,13 @@ public class AIAgentController : MonoBehaviour
 
         float distanceToTarget = Vector3.Distance(transform.position, _target.position);
 
-        if (distanceToTarget > _minThrowingDistance && distanceToTarget < _maxThrowingDistance)
+        if (distanceToTarget >= _agent.minThrowingDistance)
         {
             Throw();
         }
     }
 
-    private void Throw()
+    public void Throw()
     {
         _agent.Throw(_target);
         _target = null;
@@ -421,6 +414,13 @@ public class AIAgentController : MonoBehaviour
     {
         _agent.Stop();
         _target = _agent.outArea;
+    }
+
+    public void Defend(float reactionTime)
+    {
+        _agent.Stop();
+        WaitABit(reactionTime);
+        Wander();
     }
 
     private void OnDrawGizmos()

@@ -39,13 +39,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1298984379155410}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -34.6, y: 2, z: 28.9}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -22.8, y: 2, z: 26.5}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -120, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!23 &23352743901423646
 MeshRenderer:
   m_ObjectHideFlags: 1
@@ -115,16 +115,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugMode: 0
-  _team: 0
+  _team: 1
   _linearMaxSpeed: 5
   _angularMaxSpeed: 5
   _rb: {fileID: 54261337859368294}
   _meshRenderer: {fileID: 23352743901423646}
   _maxDistanceToBoundaries: 0.5
-  _ball: {fileID: 0}
   _throwForce: 90
+  _minThrowingDistance: 20
+  _maxThrowingDistance: 40
   _outArea: {fileID: 0}
   _hit: 0
+  _controller: {fileID: 114368980718588580}
+  _reactionTime: 0.3
 --- !u!114 &114368980718588580
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -137,12 +140,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _agent: {fileID: 114340305289821412}
-  _target: {fileID: 0}
   _scanRadiusForBall: 20
   _scanRadiusForOpponent: 100
   _destinationBuffer: 2
-  _minThrowingDistance: 20
-  _maxThrowingDistance: 80
 --- !u!136 &136764844432858434
 CapsuleCollider:
   m_ObjectHideFlags: 1
