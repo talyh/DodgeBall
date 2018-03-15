@@ -252,11 +252,14 @@ MonoBehaviour:
   _ball: {fileID: 0}
   _ballOffset: {x: 1, y: 0, z: 1}
   _throwForce: 90
-  _minThrowingDistance: 20
-  _hit: 0
+  _minThrowingDistance: 5
   _reactionTime: 0.3
   _playerControlMarker: {fileID: 1211444596488000}
-  CURRENT_TEMP: 
+  TEMP_STATE: 
+  TEMP_COND_AGENT_HAS_BALL: 0
+  TEMP_COND_AGENT_HIT: 0
+  TEMP_COND_BALL_THROWN: 0
+  TEMP_COND_TARGETTING_OPPONENT: 0
 --- !u!114 &114368980718588580
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -245,6 +245,11 @@ public class Agent : MonoBehaviour
             return;
         }
 
+        if (debugMode)
+        {
+            Debug.DrawRay(transform.position, transform.forward * 30, Color.blue);
+        }
+
         if (_ball)
         {
             if (debugMode)
@@ -348,9 +353,16 @@ public class Agent : MonoBehaviour
             return;
         }
 
+        if (debugMode)
+        {
+            Supporting.Log(string.Format("{0} picked up {1}", name, ball.name), 2);
+        }
+
         if (ball)
         {
             _ball = ball;
+            _ball.transform.position = transform.forward;
+            _ball.transform.rotation = transform.rotation;
             if (tookball != null)
             {
                 tookball();
@@ -389,8 +401,6 @@ public class Agent : MonoBehaviour
                         }
                     }
                 }
-
-                // Throw(GameController.instance.);
             }
         }
         else
@@ -405,6 +415,11 @@ public class Agent : MonoBehaviour
         if (_hit)
         {
             return;
+        }
+
+        if (debugMode)
+        {
+            Supporting.Log(string.Format("{0} threw {1} at {2}", name, _ball.name, target.name), 2);
         }
 
         if (_ball)
@@ -500,11 +515,6 @@ public class Agent : MonoBehaviour
 
             if (ball)
             {
-                if (debugMode)
-                {
-                    Supporting.Log(string.Format("{0} picked up {1}", name, ball.name));
-                }
-
                 if (!ball.thrown && !ball.taken && !hasBall)
                 {
                     Pickup(ball);

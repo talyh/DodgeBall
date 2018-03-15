@@ -6,6 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider))]
 public class Ball : MonoBehaviour
 {
+    public bool debugMode;
+
     private bool _thrown;
     public bool thrown
     {
@@ -26,6 +28,7 @@ public class Ball : MonoBehaviour
 
     private Transform _target;
     private float _desiredAirTime = 1.0f;
+    private float _timeOnAir;
 
     private GameController.Teams _courtSide;
     public GameController.Teams courtSide
@@ -54,10 +57,31 @@ public class Ball : MonoBehaviour
         GameController.instance.KeepTrack(this, null);
     }
 
+    private void Update()
+    {
+        if (thrown)
+        {
+            _timeOnAir += Time.deltaTime;
+        }
+
+        if (_timeOnAir >= _desiredAirTime * 0.5)
+        {
+            _collider.enabled = true;
+        }
+
+        DetermineCourtSide();
+
+        if (_courtSide == GameController.Teams.Out)
+        {
+            Respawn();
+        }
+    }
+
     public void Carry(Transform agent, Vector3 offset)
     {
         _rb.isKinematic = true;
         _collider.enabled = false;
+        transform.rotation = agent.rotation;
         transform.position = agent.position + agent.forward + offset;
     }
 
@@ -66,19 +90,29 @@ public class Ball : MonoBehaviour
         if (!_thrown)
         {
             _rb.isKinematic = false;
-            _collider.enabled = true;
             _thrown = true;
             Stop();
             _target = target;
             _target.GetComponent<Agent>().gotHit += Hit;
             _desiredAirTime = 60 / throwForce;
             _rb.velocity = CalculateInitialVelocityMovingTarget();
+
+            if (debugMode)
+            {
+                Supporting.Log(string.Format("{0} thrown. desiredAirTime = {1} // velocity = {2}", name, _desiredAirTime, _rb.velocity), 2);
+            }
         }
     }
 
     public void Respawn()
     {
+        if (debugMode)
+        {
+            Supporting.Log(string.Format("{0} respawned", name), 2);
+        }
+
         Stop();
+
         transform.position = _spawnPosition;
         _thrown = false;
     }
@@ -95,8 +129,12 @@ public class Ball : MonoBehaviour
 
     public void Stop()
     {
+        Debug.LogError("STOPPED");
+
         StopMoving();
         StopTurning();
+
+        _timeOnAir = 0;
     }
 
     private Vector3 CalculateInitialVelocityMovingTarget()
@@ -140,6 +178,7 @@ public class Ball : MonoBehaviour
 
     private void OnCollisionEnter(Collision coll)
     {
+        Debug.LogError("Collided with " + coll.gameObject.name);
         Stop();
 
         if (coll.gameObject.tag != GameController.Tags.Agent.ToString())
@@ -153,16 +192,6 @@ public class Ball : MonoBehaviour
         if (_target)
         {
             _target.GetComponent<Agent>().gotHit -= Hit;
-        }
-    }
-
-    void Update()
-    {
-        DetermineCourtSide();
-
-        if (_courtSide == GameController.Teams.Out)
-        {
-            Respawn();
         }
     }
 

@@ -35,6 +35,9 @@ public class AIAgentController : Controller
     private List<Vector3> _pathNodes;
 
     private bool _waiting;
+    private float _timeWandering;
+    private float _wanderingDuration = 5;
+    private Vector3 _wanderingDestination;
 
     private void Start()
     {
@@ -111,24 +114,6 @@ public class AIAgentController : Controller
         if (_agent.debugMode)
         {
             Supporting.Log(string.Format("{0} is at {1}", name, transform.position));
-        }
-
-        if (_target)
-        {
-            MoveToTarget();
-            DetermineThrow();
-        }
-        else
-        {
-            if (!_agent.hit)
-            {
-                Scan();
-            }
-        }
-
-        if (!_target)
-        {
-            Wander();
         }
 
         if (_agent.GoingOut() && !_agent.hit)
@@ -322,7 +307,32 @@ public class AIAgentController : Controller
 
     public void Wander()
     {
-        MoveToPoint(GenerateRandomPoint());
+        if (_target)
+        {
+            MoveToTarget();
+            DetermineThrow();
+        }
+        else
+        {
+            if (!_agent.hit)
+            {
+                Scan();
+            }
+        }
+
+        if (!_target)
+        {
+            if (_timeWandering >= _wanderingDuration)
+            {
+                _timeWandering = 0;
+                _wanderingDestination = GenerateRandomPoint();
+            }
+            else
+            {
+                _timeWandering += Time.deltaTime;
+                MoveToPoint(_wanderingDestination);
+            }
+        }
     }
 
     private void Scan()
@@ -437,9 +447,13 @@ public class AIAgentController : Controller
 
             if (_pathNodes != null)
             {
-                foreach (Vector3 position in _pathNodes)
+                for (int i = 0; i < _pathNodes.Count; i++)
                 {
-                    Gizmos.DrawSphere(position, 0.3f);
+                    Gizmos.DrawSphere(_pathNodes[i], 0.3f);
+                    if (i < _pathNodes.Count - 1)
+                    {
+                        Debug.DrawLine(_pathNodes[i], _pathNodes[i + 1], Color.black);
+                    }
                 }
             }
         }
