@@ -92,6 +92,14 @@ public class PlayerController : AgentController
     private void ChooseNewAgent()
     {
         _agent.playerControlMarker.SetActive(false);
+
+        AIAgentController aiController = _agent.GetComponent<AIAgentController>();
+
+        if (aiController)
+        {
+            aiController.enabled = true;
+        }
+
         int teamCount = GameController.instance.RemainingTeamCount(_agent);
 
         if (teamCount > 0)

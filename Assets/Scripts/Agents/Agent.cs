@@ -105,7 +105,7 @@ public class Agent : MonoBehaviour
     private AgentController _controller;
     public bool playerControlled
     {
-        get { return _controller.GetType() == typeof(PlayerController); }
+        get { return _controller ? _controller.GetType() == typeof(PlayerController) : false; }
     }
 
     [SerializeField]
@@ -116,7 +116,7 @@ public class Agent : MonoBehaviour
     }
     public Transform target
     {
-        get { return !playerControlled ? (_controller as AIAgentController).target : null; }
+        get { return !playerControlled && _controller ? (_controller as AIAgentController).target : null; }
     }
     [SerializeField]
     private GameObject _playerControlMarker;
@@ -166,11 +166,15 @@ public class Agent : MonoBehaviour
         stateManager.Add(State.States.Wander);
         stateManager.Add(State.States.Attack);
         stateManager.Add(State.States.Defend);
+        stateManager.Add(State.States.Out);
 
         stateManager.Add(new WanderToAttack());
         stateManager.Add(new AttackToWander());
         stateManager.Add(new WanderToDefend());
         stateManager.Add(new DefendToWander());
+        stateManager.Add(new AttackToOut());
+        stateManager.Add(new DefendToOut());
+        stateManager.Add(new WanderToOut());
 
         stateManager.Add(Condition.Conditions.AgentHasBall);
         stateManager.Add(Condition.Conditions.AgentHit);
@@ -268,6 +272,11 @@ public class Agent : MonoBehaviour
 
     public bool GoingOut()
     {
+        if (_hit)
+        {
+            return false;
+        }
+
         float x = transform.position.x + transform.forward.x;
         float z = transform.position.z + transform.forward.z;
 
@@ -307,7 +316,6 @@ public class Agent : MonoBehaviour
     {
         _rb.velocity = -transform.right * _linearMaxSpeed;
     }
-
 
     public void TurnRight()
     {
@@ -421,26 +429,75 @@ public class Agent : MonoBehaviour
     }
 
     // called when the agent arrives at the Out area
-    public void GoOut()
+    public void SitOut()
     {
+        _controller = null;
+        StartCoroutine(FaceGame());
+        StartCoroutine(WatchGame());
+    }
+
+    private IEnumerator FaceGame()
+    {
+        while (!WatchingGame())
+        {
+            TurnLeft();
+            yield return null;
+        }
+    }
+
+    private IEnumerator WatchGame()
+    {
+        yield return new WaitUntil(() => WatchingGame());
         Stop();
         _rb.isKinematic = true;
-        _team = GameController.Teams.Out;
+    }
+
+    private bool WatchingGame()
+    {
+        int alignment = transform.parent.localEulerAngles.y >= 180 && transform.parent.localEulerAngles.y < 360 ? -1 : 1;
+        float angle = Vector3.Angle(transform.forward, alignment * transform.parent.right);
+        angle = angle < 0 ? 360 + angle : angle;
+
+        if (debugMode)
+        {
+            Supporting.Log(string.Format("{0} turning to watch game. Current angle {1}. Rotating towards: {2}", name, angle, alignment * transform.parent.right));
+            Debug.DrawRay(transform.position, transform.forward * 15, Color.magenta);
+            Debug.DrawRay(transform.position, alignment * transform.parent.right * 15, Color.cyan);
+        }
+
+        return angle + _angularMaxSpeed % 360 >= 0 && angle + _angularMaxSpeed % 360 <= 10;
     }
 
     public void Attack()
     {
-        _controller.Attack();
+        if (_controller)
+        {
+            _controller.Attack();
+        }
     }
 
     public void Wander()
     {
-        _controller.Wander();
+        if (_controller)
+        {
+            _controller.Wander();
+        }
     }
 
     public void Defend()
     {
-        _controller.Defend();
+        if (_controller)
+        {
+            _controller.Defend();
+        }
+    }
+
+    public void Out()
+    {
+        if (_controller)
+        {
+            _controller.Out();
+        }
     }
 
     private void OnCollisionEnter(Collision coll)
@@ -503,6 +560,19 @@ public class Agent : MonoBehaviour
             {
                 Supporting.Log(string.Format("{0}'s corner D: {1}", name, cornerD));
             }
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (tookball != null)
+        {
+            tookball = null;
+        }
+
+        if (gotHit != null)
+        {
+            gotHit = null;
         }
     }
 }

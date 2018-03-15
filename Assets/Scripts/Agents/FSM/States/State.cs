@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public abstract class State
 {
-    public enum States { Invalid = -1, Wander, Attack, Defend }
+    public enum States { Invalid = -1, Wander, Attack, Defend, Out }
 
     protected States _name = States.Invalid;
     public States name
@@ -45,6 +45,8 @@ public abstract class State
                 return new Attack();
             case State.States.Defend:
                 return new Defend();
+            case State.States.Out:
+                return new Out();
             default:
                 Supporting.Log("Couldn't resolve state to be added", 1);
                 return null;

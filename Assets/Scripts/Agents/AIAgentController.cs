@@ -121,22 +121,24 @@ public class AIAgentController : AgentController
 
     private void MoveToTarget()
     {
-        if (_agent.hit)
-        {
-            DetermineWalkMask();
-            Vector3 targetPosition = _target.position;
-            targetPosition.z -= (GameController.instance.teamSize - GameController.instance.RemainingTeamCount(_agent)) * _agent.transform.localScale.z;
-            DeterminePath(targetPosition);
-        }
-        else
-        {
-            DeterminePath(_target.position);
+        // if (_agent.hit)
+        // {
+        // DetermineWalkMask();
+        // Vector3 targetPosition = _target.position;
+        // targetPosition.z -= (GameController.instance.teamSize - GameController.instance.RemainingTeamCount(_agent)) * _agent.transform.localScale.z;
+        // Debug.LogWarning(Time.frameCount + " >> " + _agent.team.ToString() + " remaning count: " + GameController.instance.RemainingTeamCount(_agent));
+        // Debug.LogWarning(name + "'s targePosition: " + targetPosition);
+        // DeterminePath(targetPosition);
+        // }
+        // else
+        // {
+        DeterminePath(_target.position);
 
-            if (_agent.debugMode)
-            {
-                Supporting.Log(string.Format("{0} decided to move to {1} to throw at {2}", name, _target.position, _target.name));
-            }
-        }
+        // if (_agent.debugMode)
+        // {
+        //     Supporting.Log(string.Format("{0} decided to move to {1} to throw at {2}", name, _target.position, _target.name));
+        // }
+        // }
 
         if (_pathNodes.Count > 0)
         {
@@ -210,12 +212,26 @@ public class AIAgentController : AgentController
                 _agent.Stop();
                 if (_target)
                 {
-                    Ball ball = _target.GetComponent<Ball>();
-                    if (ball)
-                    {
-                        _agent.Pickup(ball);
-                    }
-                    else if (_target == _agent.outArea)
+                    // Ball ball = _target.GetComponent<Ball>();
+                    // if (ball)
+                    // {
+                    //     _agent.Pickup(ball);
+                    // }
+                    // else if (_target == _agent.outArea)
+                    // {
+                    //     if (_agent.debugMode)
+                    //     {
+                    //         Supporting.Log(string.Format("{0} arrived at {1}", name, _agent.outArea.name));
+                    //     }
+
+                    //     NavMeshObstacle obstacle = gameObject.GetComponent<NavMeshObstacle>();
+                    //     obstacle.carving = true;
+
+                    //     _agent.SitOut();
+
+                    //     this.enabled = false;
+                    // }
+                    if (_agent.hit)
                     {
                         if (_agent.debugMode)
                         {
@@ -225,16 +241,24 @@ public class AIAgentController : AgentController
                         NavMeshObstacle obstacle = gameObject.GetComponent<NavMeshObstacle>();
                         obstacle.carving = true;
 
-                        _agent.GoOut();
+                        _agent.SitOut();
 
                         this.enabled = false;
                     }
                     else
                     {
-                        if (_agent.debugMode)
+                        Ball ball = _target.GetComponent<Ball>();
+                        if (ball)
                         {
-                            Supporting.Log(string.Format("{0} distance to {1} is {2}", name, finalDestination, distance));
+                            _agent.Pickup(ball);
                         }
+                    }
+                }
+                else
+                {
+                    if (_agent.debugMode)
+                    {
+                        Supporting.Log(string.Format("{0} distance to {1} is {2}", name, finalDestination, distance));
                     }
                 }
 
@@ -415,10 +439,28 @@ public class AIAgentController : AgentController
         _waiting = false;
     }
 
-    private void GoOut()
+    public void GoOut()
     {
+        _agent.gotHit -= GoOut;
         _agent.Stop();
-        _target = _agent.outArea;
+
+        DetermineWalkMask();
+
+        Vector3 outPosition = _agent.outArea.position;
+        outPosition.z -= (GameController.instance.teamSize - GameController.instance.RemainingTeamCount(_agent)) * (_agent.transform.localScale.z + 2);
+
+        GameObject spot = new GameObject();
+        spot.transform.parent = _agent.outArea;
+        spot.transform.position = outPosition;
+        spot.name = string.Format("Spot for {0}", _agent.name);
+
+        _target = spot.transform;
+        _agent.transform.parent = _target;
+    }
+
+    public override void Out()
+    {
+        MoveToTarget();
     }
 
     public override void Defend()
@@ -452,11 +494,17 @@ public class AIAgentController : AgentController
                 }
             }
         }
+
+        if (_agent.hit)
+        {
+            Gizmos.color = Color.grey;
+            Gizmos.DrawCube(_target.position, _target.lossyScale);
+        }
     }
 
     private void OnDisable()
     {
         _agent.tookball -= ClearTarget;
-        _agent.gotHit -= GoOut;
+        // _agent.gotHit -= GoOut;
     }
 }

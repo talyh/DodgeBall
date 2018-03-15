@@ -184,13 +184,13 @@ public class Ball : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-        if (_target)
-        {
-            _target.GetComponent<Agent>().gotHit -= Hit;
-        }
-    }
+    // private void OnDisable()
+    // {
+    //     if (_target)
+    //     {
+    //         _target.GetComponent<Agent>().gotHit -= Hit;
+    //     }
+    // }
 
     private void DetermineCourtSide()
     {

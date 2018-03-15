@@ -15,4 +15,7 @@ public abstract class AgentController : MonoBehaviour
     public abstract void Throw();
 
     public abstract void Defend();
+
+    public virtual void Out()
+    { }
 }
