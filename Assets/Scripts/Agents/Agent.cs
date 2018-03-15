@@ -86,7 +86,7 @@ public class Agent : MonoBehaviour
         get { return GameController.instance.GetOutArea(this); }
     }
 
-    public bool _hit;
+    private bool _hit;
     public bool hit
     {
         get { return _hit; }
@@ -121,7 +121,11 @@ public class Agent : MonoBehaviour
         get { return _playerControlMarker; }
     }
 
-    public string CURRENT_TEMP;
+    public string TEMP_STATE;
+    public bool TEMP_COND_AGENT_HAS_BALL;
+    public bool TEMP_COND_AGENT_HIT;
+    public bool TEMP_COND_BALL_THROWN;
+    public bool TEMP_COND_TARGETTING_OPPONENT;
 
     private void Start()
     {
@@ -223,7 +227,11 @@ public class Agent : MonoBehaviour
         //     }
         // }
 
-        CURRENT_TEMP = _stateManager.currentState.ToString();
+        TEMP_STATE = _stateManager.currentState.ToString();
+        TEMP_COND_AGENT_HAS_BALL = _stateManager.GetCondition(Condition.Conditions.AgentHasBall).IsTrue();
+        TEMP_COND_AGENT_HIT = _stateManager.GetCondition(Condition.Conditions.AgentHit).IsTrue();
+        TEMP_COND_BALL_THROWN = _stateManager.GetCondition(Condition.Conditions.BallThrownByOpponent).IsTrue();
+        TEMP_COND_TARGETTING_OPPONENT = _stateManager.GetCondition(Condition.Conditions.TargettingOpponent).IsTrue();
 
         if (!GameController.instance.gameStarted)
         {

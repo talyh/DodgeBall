@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class BallThrownByOpponent : Condition
 {
@@ -10,7 +11,7 @@ public class BallThrownByOpponent : Condition
 
     public override bool IsTrue()
     {
-        return GameController.instance.BallThrown();
+        return GameController.instance.BallThrown().Where(entry => entry.Value.team != agent.team).Count() > 0;
     }
 
     protected override void AdditionalShutDown()

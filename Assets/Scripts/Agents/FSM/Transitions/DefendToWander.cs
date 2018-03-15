@@ -18,8 +18,9 @@ public class DefendToWander : Transition
 
         bool hit = agent.stateManager.GetCondition(Condition.Conditions.AgentHit).IsTrue();
         bool hasBall = agent.stateManager.GetCondition(Condition.Conditions.AgentHasBall).IsTrue();
+        bool ballThrownByOpponent = agent.stateManager.GetCondition(Condition.Conditions.BallThrownByOpponent).IsTrue();
 
-        if (!hit && !hasBall)
+        if (!hit && !hasBall && !ballThrownByOpponent)
         {
             return agent.stateManager.GetState(_targetState);
         }

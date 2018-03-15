@@ -1093,7 +1093,7 @@ MonoBehaviour:
   _blueTeamArea: {fileID: 815377561}
   _blueTeamOutArea: {fileID: 1380076554}
   _defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
-  _teamSize: 1
+  _teamSize: 2
   _teamMemberPrefab: {fileID: 1298984379155410, guid: 76ba17574332f46759d12ecef16033e3,
     type: 2}
   _playerController: {fileID: 1078202747}

@@ -411,8 +411,8 @@ public class GameController : Singleton<GameController>
         }
     }
 
-    public bool BallThrown()
+    public KeyValuePair<Ball, Agent>[] BallThrown()
     {
-        return _balls.Where(entry => entry.Key.thrown).Count() > 0;
+        return _balls.Where(entry => entry.Key.thrown).ToArray();
     }
 }
