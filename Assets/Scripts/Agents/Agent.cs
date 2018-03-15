@@ -102,7 +102,7 @@ public class Agent : MonoBehaviour
         get { return _stateManager.currentState; }
     }
 
-    private Controller _controller;
+    private AgentController _controller;
     public bool playerControlled
     {
         get { return _controller.GetType() == typeof(PlayerController); }
@@ -110,6 +110,10 @@ public class Agent : MonoBehaviour
 
     [SerializeField]
     private float _reactionTime = 0.3f;
+    public float reactionTime
+    {
+        get { return _reactionTime; }
+    }
     public Transform target
     {
         get { return !playerControlled ? (_controller as AIAgentController).target : null; }
@@ -211,7 +215,7 @@ public class Agent : MonoBehaviour
         _meshRenderer.material = newMaterial;
     }
 
-    public void SetController(Controller controller)
+    public void SetController(AgentController controller)
     {
         _controller = controller;
     }
@@ -375,38 +379,7 @@ public class Agent : MonoBehaviour
     // called by the State Machine
     public void Throw()
     {
-        if (playerControlled)
-        {
-            if (hasBall && Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                Vector3 distance = transform.forward * (_controller as PlayerController).scanForOpponentDistance;
-                LayerMask layermask = 1 << LayerMask.NameToLayer(GameController.Layers.Agent.ToString());
-
-                RaycastHit[] hits = Physics.SphereCastAll(transform.position, 10, distance, layermask);
-
-                if (debugMode)
-                {
-                    Debug.DrawRay(transform.position, transform.forward * 30, Color.cyan);
-                }
-
-                foreach (RaycastHit hit in hits)
-                {
-                    Agent opponent = hit.transform.GetComponent<Agent>();
-                    if (opponent)
-                    {
-                        if (opponent.team != _team)
-                        {
-                            Throw(opponent.transform);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            (_controller as AIAgentController).Throw();
-        }
+        _controller.Throw();
     }
 
     // called by the Controller, now with a target to throw at
@@ -447,6 +420,7 @@ public class Agent : MonoBehaviour
         }
     }
 
+    // called when the agent arrives at the Out area
     public void GoOut()
     {
         Stop();
@@ -454,52 +428,19 @@ public class Agent : MonoBehaviour
         _team = GameController.Teams.Out;
     }
 
+    public void Attack()
+    {
+        _controller.Attack();
+    }
+
     public void Wander()
     {
-        if (playerControlled)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if (!hasBall)
-                {
-                    Vector3 distance = transform.forward * (_controller as PlayerController).scanForBallDistance;
-                    LayerMask layermask = 1 << LayerMask.NameToLayer(GameController.Layers.Ball.ToString());
-
-                    RaycastHit[] hits = Physics.SphereCastAll(transform.position, 3, distance, layermask);
-
-                    if (debugMode)
-                    {
-                        Debug.DrawRay(transform.position, transform.forward * 3, Color.cyan);
-                    }
-
-                    foreach (RaycastHit hit in hits)
-                    {
-                        Ball ball = hit.transform.GetComponent<Ball>();
-                        if (ball)
-                        {
-                            Pickup(ball);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            (_controller as AIAgentController).Wander();
-        }
+        _controller.Wander();
     }
 
     public void Defend()
     {
-        if (playerControlled)
-        {
-
-        }
-        else
-        {
-            (_controller as AIAgentController).Defend(_reactionTime);
-        }
+        _controller.Defend();
     }
 
     private void OnCollisionEnter(Collision coll)

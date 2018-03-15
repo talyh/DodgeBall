@@ -6,12 +6,8 @@ using System.Linq;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(Agent))]
-public class AIAgentController : Controller
+public class AIAgentController : AgentController
 {
-    [Header("Agent Configuration")]
-    [SerializeField]
-    private Agent _agent;
-
     private int _courtAreaMask;
 
     public Transform _target;
@@ -37,7 +33,7 @@ public class AIAgentController : Controller
     private bool _waiting;
     private float _timeWandering;
     private float _wanderingDuration = 5;
-    private Vector3 _wanderingDestination;
+    public Vector3 _wanderingDestination;
 
     private void Start()
     {
@@ -217,13 +213,7 @@ public class AIAgentController : Controller
                     Ball ball = _target.GetComponent<Ball>();
                     if (ball)
                     {
-                        if (_agent.debugMode)
-                        {
-                            Supporting.Log(string.Format("{0} picked up {1}", name, ball.name));
-                        }
-
                         _agent.Pickup(ball);
-                        _target = null;
                     }
                     else if (_target == _agent.outArea)
                     {
@@ -305,19 +295,11 @@ public class AIAgentController : Controller
         }
     }
 
-    public void Wander()
+    public override void Wander()
     {
-        if (_target)
+        if (!_agent.hit && !_target)
         {
-            MoveToTarget();
-            DetermineThrow();
-        }
-        else
-        {
-            if (!_agent.hit)
-            {
-                Scan();
-            }
+            Scan();
         }
 
         if (!_target)
@@ -332,6 +314,10 @@ public class AIAgentController : Controller
                 _timeWandering += Time.deltaTime;
                 MoveToPoint(_wanderingDestination);
             }
+        }
+        else
+        {
+            MoveToTarget();
         }
     }
 
@@ -375,9 +361,9 @@ public class AIAgentController : Controller
         }
     }
 
-    private bool ValidTarget(Agent agent)
+    private bool ValidTarget(Agent target)
     {
-        if (agent.team == _agent.team || agent.team == GameController.Teams.Out)
+        if (target.team == _agent.team || target.hit)
         {
             return false;
         }
@@ -387,7 +373,7 @@ public class AIAgentController : Controller
 
     private bool ValidTarget(Ball ball)
     {
-        if (ball.courtSide != _agent.team)
+        if (ball.courtSide != _agent.team || ball.taken)
         {
             return false;
         }
@@ -395,7 +381,7 @@ public class AIAgentController : Controller
         return true;
     }
 
-    private void DetermineThrow()
+    public override void Attack()
     {
         if (!_agent.hasBall || _target.tag != GameController.Tags.Agent.ToString())
         {
@@ -408,9 +394,13 @@ public class AIAgentController : Controller
         {
             Throw();
         }
+        else
+        {
+            MoveToTarget();
+        }
     }
 
-    public void Throw()
+    public override void Throw()
     {
         _agent.Throw(_target);
         _target = null;
@@ -431,7 +421,12 @@ public class AIAgentController : Controller
         _target = _agent.outArea;
     }
 
-    public void Defend(float reactionTime)
+    public override void Defend()
+    {
+        Defend(_agent.reactionTime);
+    }
+
+    private void Defend(float reactionTime)
     {
         _agent.Stop();
         WaitABit(reactionTime);

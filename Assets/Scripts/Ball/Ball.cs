@@ -129,8 +129,6 @@ public class Ball : MonoBehaviour
 
     public void Stop()
     {
-        Debug.LogError("STOPPED");
-
         StopMoving();
         StopTurning();
 
@@ -178,7 +176,6 @@ public class Ball : MonoBehaviour
 
     private void OnCollisionEnter(Collision coll)
     {
-        Debug.LogError("Collided with " + coll.gameObject.name);
         Stop();
 
         if (coll.gameObject.tag != GameController.Tags.Agent.ToString())

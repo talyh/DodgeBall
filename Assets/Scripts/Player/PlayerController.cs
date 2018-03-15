@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : Controller
+public class PlayerController : AgentController
 {
-
-    [SerializeField]
-    private Agent _agent;
     [SerializeField]
     private float _scanForBallDistance = 3;
     public float scanForBallDistance
@@ -18,6 +15,12 @@ public class PlayerController : Controller
     public float scanForOpponentDistance
     {
         get { return _scanForOpponentDistance; }
+    }
+    [SerializeField]
+    private float _scanningRadius = 10;
+    public float scanningRadius
+    {
+        get { return _scanningRadius; }
     }
 
     private void Update()
@@ -96,6 +99,75 @@ public class PlayerController : Controller
             int random = Random.Range(0, teamCount);
             GameController.instance.SetPlayerControlled(_agent.team, random);
         }
+    }
+
+    public override void Attack()
+    {
+        // Determine if should throw
+        _agent.Throw();
+    }
+
+    public override void Throw()
+    {
+        if (_agent.hasBall && Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            Vector3 distance = _agent.transform.forward * _scanForOpponentDistance;
+            LayerMask layermask = 1 << LayerMask.NameToLayer(GameController.Layers.Agent.ToString());
+
+            RaycastHit[] hits = Physics.SphereCastAll(_agent.transform.position, _scanningRadius, distance, layermask);
+
+            if (_agent.debugMode)
+            {
+                Debug.DrawRay(_agent.transform.position, distance, Color.cyan);
+            }
+
+            foreach (RaycastHit hit in hits)
+            {
+                Agent opponent = hit.transform.GetComponent<Agent>();
+                if (opponent)
+                {
+                    if (opponent.team != _agent.team && !opponent.hit)
+                    {
+                        _agent.Throw(opponent.transform);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public override void Wander()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (!_agent.hasBall)
+            {
+                Vector3 distance = _agent.transform.forward * _scanForBallDistance;
+                LayerMask layermask = 1 << LayerMask.NameToLayer(GameController.Layers.Ball.ToString());
+
+                RaycastHit[] hits = Physics.SphereCastAll(_agent.transform.position, _scanningRadius, distance, layermask);
+
+                if (_agent.debugMode)
+                {
+                    Debug.DrawRay(_agent.transform.position, distance, Color.cyan);
+                }
+
+                foreach (RaycastHit hit in hits)
+                {
+                    Ball ball = hit.transform.GetComponent<Ball>();
+                    if (ball)
+                    {
+                        _agent.Pickup(ball);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public override void Defend()
+    {
+
     }
 
     private void OnDisable()

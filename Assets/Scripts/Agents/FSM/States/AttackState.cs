@@ -14,7 +14,7 @@ public class Attack : State
 
     public override void Update()
     {
-        agent.Throw();
+        agent.Attack();
     }
 
     public override void OnExit()
