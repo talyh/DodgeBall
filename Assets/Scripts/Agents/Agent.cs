@@ -65,6 +65,8 @@ public class Agent : MonoBehaviour
     {
         get { return _ball; }
     }
+    [SerializeField]
+    private Vector3 _ballOffset;
 
     [SerializeField]
     private float _throwForce = 15;
@@ -118,6 +120,8 @@ public class Agent : MonoBehaviour
     {
         get { return _playerControlMarker; }
     }
+
+    public string CURRENT_TEMP;
 
     private void Start()
     {
@@ -210,14 +214,16 @@ public class Agent : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            System.Delegate[] subscribers = gotHit.GetInvocationList();
-            foreach (System.Delegate subscriber in subscribers)
-            {
-                Debug.Log(name + " " + subscriber.Target + " " + subscriber.Method);
-            }
-        }
+        // if (Input.GetKeyDown(KeyCode.Space))
+        // {
+        //     System.Delegate[] subscribers = gotHit.GetInvocationList();
+        //     foreach (System.Delegate subscriber in subscribers)
+        //     {
+        //         Debug.Log(name + " " + subscriber.Target + " " + subscriber.Method);
+        //     }
+        // }
+
+        CURRENT_TEMP = _stateManager.currentState.ToString();
 
         if (!GameController.instance.gameStarted)
         {
@@ -233,9 +239,13 @@ public class Agent : MonoBehaviour
 
         if (_ball)
         {
-            Vector3 offset = _ball.transform.position - transform.position;
-            offset.y = transform.position.y;
-            _ball.Carry(transform, offset);
+            if (debugMode)
+            {
+                Supporting.Log(string.Format("{0} carrying {1} \n {0} position: {2} - {1} position: {3} - offset {4}",
+                    name, _ball.name, transform.position, _ball.transform.position, _ballOffset));
+            }
+
+            _ball.Carry(transform, _ballOffset);
         }
     }
 
@@ -333,7 +343,10 @@ public class Agent : MonoBehaviour
         if (ball)
         {
             _ball = ball;
-            tookball();
+            if (tookball != null)
+            {
+                tookball();
+            }
 
             GameController.instance.KeepTrack(ball, this);
         }
@@ -344,7 +357,33 @@ public class Agent : MonoBehaviour
     {
         if (playerControlled)
         {
+            if (hasBall && Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                Vector3 distance = transform.forward * (_controller as PlayerController).scanForOpponentDistance;
+                LayerMask layermask = 1 << LayerMask.NameToLayer(GameController.Layers.Agent.ToString());
 
+                RaycastHit[] hits = Physics.SphereCastAll(transform.position, 10, distance, layermask);
+
+                if (debugMode)
+                {
+                    Debug.DrawRay(transform.position, transform.forward * 30, Color.cyan);
+                }
+
+                foreach (RaycastHit hit in hits)
+                {
+                    Agent opponent = hit.transform.GetComponent<Agent>();
+                    if (opponent)
+                    {
+                        if (opponent.team != _team)
+                        {
+                            Throw(opponent.transform);
+                            break;
+                        }
+                    }
+                }
+
+                // Throw(GameController.instance.);
+            }
         }
         else
         {
@@ -373,6 +412,8 @@ public class Agent : MonoBehaviour
         {
             _hit = true;
             Stop();
+            GameController.instance.RemoveFromTeam(this);
+            SetMaterial(GameController.instance.defaultMaterial);
 
             if (gotHit != null)
             {
@@ -380,9 +421,6 @@ public class Agent : MonoBehaviour
                 // Supporting.Log(string.Format("{0} {1} {2}", name, subscribers[0].Target, subscribers[0].Method));
                 gotHit();
             }
-
-            GameController.instance.RemoveFromTeam(this);
-            SetMaterial(GameController.instance.defaultMaterial);
         }
     }
 
@@ -397,7 +435,31 @@ public class Agent : MonoBehaviour
     {
         if (playerControlled)
         {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if (!hasBall)
+                {
+                    Vector3 distance = transform.forward * (_controller as PlayerController).scanForBallDistance;
+                    LayerMask layermask = 1 << LayerMask.NameToLayer(GameController.Layers.Ball.ToString());
 
+                    RaycastHit[] hits = Physics.SphereCastAll(transform.position, 3, distance, layermask);
+
+                    if (debugMode)
+                    {
+                        Debug.DrawRay(transform.position, transform.forward * 3, Color.cyan);
+                    }
+
+                    foreach (RaycastHit hit in hits)
+                    {
+                        Ball ball = hit.transform.GetComponent<Ball>();
+                        if (ball)
+                        {
+                            Pickup(ball);
+                            break;
+                        }
+                    }
+                }
+            }
         }
         else
         {

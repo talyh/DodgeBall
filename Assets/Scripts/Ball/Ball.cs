@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(SphereCollider))]
 public class Ball : MonoBehaviour
 {
     private bool _thrown;
@@ -17,7 +19,10 @@ public class Ball : MonoBehaviour
 
     private Vector3 _spawnPosition;
 
-    private Rigidbody _rb = null;
+    [SerializeField]
+    private Rigidbody _rb;
+    [SerializeField]
+    private SphereCollider _collider;
 
     private Transform _target;
     private float _desiredAirTime = 1.0f;
@@ -40,14 +45,20 @@ public class Ball : MonoBehaviour
             _rb = GetComponent<Rigidbody>();
         }
 
+        if (!_collider)
+        {
+            _collider = GetComponent<SphereCollider>();
+        }
+
         _spawnPosition = transform.position;
         GameController.instance.KeepTrack(this, null);
     }
 
     public void Carry(Transform agent, Vector3 offset)
     {
-        transform.position = agent.position + offset;
         _rb.isKinematic = true;
+        _collider.enabled = false;
+        transform.position = agent.position + agent.forward + offset;
     }
 
     public void Throw(Transform target, float throwForce)
@@ -55,6 +66,7 @@ public class Ball : MonoBehaviour
         if (!_thrown)
         {
             _rb.isKinematic = false;
+            _collider.enabled = true;
             _thrown = true;
             Stop();
             _target = target;

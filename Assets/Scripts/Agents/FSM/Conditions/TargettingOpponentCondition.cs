@@ -11,7 +11,11 @@ public class TargettingOpponent : Condition
 
     public override bool IsTrue()
     {
-        if (agent.target)
+        if (agent.playerControlled)
+        {
+            return true;
+        }
+        else if (agent.target)
         {
             Agent opponent = agent.target.GetComponent<Agent>();
 

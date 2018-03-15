@@ -7,6 +7,18 @@ public class PlayerController : Controller
 
     [SerializeField]
     private Agent _agent;
+    [SerializeField]
+    private float _scanForBallDistance = 3;
+    public float scanForBallDistance
+    {
+        get { return _scanForBallDistance; }
+    }
+    [SerializeField]
+    private float _scanForOpponentDistance = 40;
+    public float scanForOpponentDistance
+    {
+        get { return _scanForOpponentDistance; }
+    }
 
     private void Update()
     {
@@ -53,17 +65,13 @@ public class PlayerController : Controller
             || Input.GetKeyUp(KeyCode.DownArrow)
             || Input.GetKeyUp(KeyCode.Q)
             || Input.GetKeyUp(KeyCode.RightArrow)
-            )
-        {
-            _agent.StopMoving();
-        }
-        if (Input.GetKeyUp(KeyCode.Q)
+            || Input.GetKeyUp(KeyCode.Q)
             || Input.GetKeyUp(KeyCode.LeftShift)
             || Input.GetKeyUp(KeyCode.E)
             || Input.GetKeyUp(KeyCode.RightShift)
             )
         {
-            _agent.StopTurning();
+            _agent.Stop();
         }
     }
 
