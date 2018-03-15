@@ -79,11 +79,9 @@ public class Agent : MonoBehaviour
         get { return _minThrowingDistance; }
     }
 
-    [SerializeField]
-    private Transform _outArea;
     public Transform outArea
     {
-        get { return _outArea; }
+        get { return GameController.instance.GetOutArea(this); }
     }
 
     public bool _hit;
@@ -101,24 +99,23 @@ public class Agent : MonoBehaviour
     {
         get { return _stateManager.currentState; }
     }
-    [SerializeField]
-    public string CURRENT_TEMP;
 
-    [SerializeField]
-    private AIAgentController _controller;
+    private Controller _controller;
+    public bool playerControlled
+    {
+        get { return _controller.GetType() == typeof(PlayerController); }
+    }
 
     [SerializeField]
     private float _reactionTime = 0.3f;
     public Transform target
     {
-        get { return _controller.target; }
+        get { return !playerControlled ? (_controller as AIAgentController).target : null; }
     }
 
     private void Start()
     {
-        EnrollInTeam();
         Setup();
-        DetermineAgentColor();
     }
 
     private void Setup()
@@ -167,6 +164,18 @@ public class Agent : MonoBehaviour
         _stateManager.SetInitialState(State.States.Wander);
     }
 
+    public void SetTeam(GameController.Teams team)
+    {
+        _team = team;
+        EnrollInTeam();
+        DetermineAgentColor();
+    }
+
+    private void EnrollInTeam()
+    {
+        GameController.instance.EnrollTeamMember(this);
+    }
+
     private void DetermineAgentColor()
     {
         switch (_team)
@@ -183,18 +192,32 @@ public class Agent : MonoBehaviour
         }
     }
 
-    void SetMaterial(Material newMaterial)
+    private void SetMaterial(Material newMaterial)
     {
         _meshRenderer.material = newMaterial;
     }
 
-    void EnrollInTeam()
+    public void SetController(Controller controller)
     {
-        GameController.instance.EnrollTeamMember(this);
+        _controller = controller;
     }
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            System.Delegate[] subscribers = gotHit.GetInvocationList();
+            foreach (System.Delegate subscriber in subscribers)
+            {
+                Debug.Log(name + " " + subscriber.Target + " " + subscriber.Method);
+            }
+        }
+
+        if (!GameController.instance.gameStarted)
+        {
+            return;
+        }
+
         stateManager.Update();
 
         if (_hit)
@@ -208,8 +231,6 @@ public class Agent : MonoBehaviour
             offset.y = transform.position.y;
             _ball.Carry(transform, offset);
         }
-
-        CURRENT_TEMP = currentState.ToString();
     }
 
     public bool GoingOut()
@@ -237,6 +258,21 @@ public class Agent : MonoBehaviour
     public void MoveForwards()
     {
         _rb.velocity = transform.forward * _linearSpeed;
+    }
+
+    public void MoveBackwards()
+    {
+        _rb.velocity = -transform.forward * _linearMaxSpeed;
+    }
+
+    public void StrafeRight()
+    {
+        _rb.velocity = transform.right * _linearMaxSpeed;
+    }
+
+    public void StrafeLeft()
+    {
+        _rb.velocity = -transform.right * _linearMaxSpeed;
     }
 
 
@@ -300,7 +336,14 @@ public class Agent : MonoBehaviour
     // called by the State Machine
     public void Throw()
     {
-        _controller.Throw();
+        if (playerControlled)
+        {
+
+        }
+        else
+        {
+            (_controller as AIAgentController).Throw();
+        }
     }
 
     // called by the Controller, now with a target to throw at
@@ -323,7 +366,14 @@ public class Agent : MonoBehaviour
         if (!_hit)
         {
             _hit = true;
-            gotHit();
+
+            System.Delegate[] subscribers = gotHit.GetInvocationList();
+            if (subscribers != null)
+            {
+                Debug.Log(name + " " + subscribers[0].Target + " " + subscribers[0].Method);
+                gotHit();
+            }
+
             GameController.instance.RemoveFromTeam(this);
             SetMaterial(GameController.instance.defaultMaterial);
         }
@@ -338,12 +388,26 @@ public class Agent : MonoBehaviour
 
     public void Wander()
     {
-        _controller.Wander();
+        if (playerControlled)
+        {
+
+        }
+        else
+        {
+            (_controller as AIAgentController).Wander();
+        }
     }
 
     public void Defend()
     {
-        _controller.Defend(_reactionTime);
+        if (playerControlled)
+        {
+
+        }
+        else
+        {
+            (_controller as AIAgentController).Defend(_reactionTime);
+        }
     }
 
     private void OnCollisionEnter(Collision coll)

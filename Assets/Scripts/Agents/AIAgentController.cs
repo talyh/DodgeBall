@@ -6,7 +6,7 @@ using System.Linq;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(Agent))]
-public class AIAgentController : MonoBehaviour
+public class AIAgentController : Controller
 {
     [Header("Agent Configuration")]
     [SerializeField]
@@ -98,6 +98,11 @@ public class AIAgentController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!GameController.instance.gameStarted)
+        {
+            return;
+        }
+
         if (_waiting)
         {
             return;
@@ -139,7 +144,7 @@ public class AIAgentController : MonoBehaviour
         {
             DetermineWalkMask();
             Vector3 targetPosition = _target.position;
-            targetPosition.z -= (GameController.TEAM_SIZE - GameController.instance.RemainingTeamCount(_agent)) * _agent.transform.localScale.z;
+            targetPosition.z -= (GameController.instance.teamSize - GameController.instance.RemainingTeamCount(_agent)) * _agent.transform.localScale.z;
             DeterminePath(targetPosition);
         }
         else

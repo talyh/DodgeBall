@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    public bool _thrown;
+    private bool _thrown;
     public bool thrown
     {
         get { return _thrown; }
@@ -69,7 +69,6 @@ public class Ball : MonoBehaviour
         Stop();
         transform.position = _spawnPosition;
         _thrown = false;
-        // TODO consider scoring against the team that lead the nall to go out
     }
 
     public void StopMoving()
