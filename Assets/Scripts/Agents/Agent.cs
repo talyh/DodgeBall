@@ -112,6 +112,12 @@ public class Agent : MonoBehaviour
     {
         get { return !playerControlled ? (_controller as AIAgentController).target : null; }
     }
+    [SerializeField]
+    private GameObject _playerControlMarker;
+    public GameObject playerControlMarker
+    {
+        get { return _playerControlMarker; }
+    }
 
     private void Start()
     {
@@ -366,11 +372,12 @@ public class Agent : MonoBehaviour
         if (!_hit)
         {
             _hit = true;
+            Stop();
 
-            System.Delegate[] subscribers = gotHit.GetInvocationList();
-            if (subscribers != null)
+            if (gotHit != null)
             {
-                Debug.Log(name + " " + subscribers[0].Target + " " + subscribers[0].Method);
+                //System.Delegate[] subscribers = gotHit.GetInvocationList();     
+                // Supporting.Log(string.Format("{0} {1} {2}", name, subscribers[0].Target, subscribers[0].Method));
                 gotHit();
             }
 

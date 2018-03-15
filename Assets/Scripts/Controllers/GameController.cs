@@ -171,19 +171,45 @@ public class GameController : Singleton<GameController>
                 break;
         }
 
-        int random = Random.Range(0, teamMembers.Count);
-        Agent selected = teamMembers[random];
+        if (teamMembers != null)
+        {
+            int random = Random.Range(0, teamMembers.Count);
+            Agent selected = teamMembers[random];
+            SetPlayerControlled(selected);
 
-        selected.gameObject.GetComponent<AIAgentController>().enabled = false;
-        selected.SetController(_playerController);
-        _playerController.SetAgent(selected);
-
-        _gameStarted = true;
+            _gameStarted = true;
+        }
     }
 
-    private void Update()
+    private void SetPlayerControlled(Agent teamMember)
     {
+        teamMember.gameObject.GetComponent<AIAgentController>().enabled = false;
+        teamMember.SetController(_playerController);
+        teamMember.playerControlMarker.SetActive(true);
+        _playerController.SetAgent(teamMember);
+    }
 
+    public void SetPlayerControlled(Teams team, int position)
+    {
+        List<Agent> teamMembers = null;
+
+        switch (team)
+        {
+            case Teams.Red:
+                teamMembers = _redTeam;
+                break;
+            case Teams.Blue:
+                teamMembers = _blueTeam;
+                break;
+            default:
+                Supporting.Log(string.Format("Couldn't determine the container for team {0}", team));
+                break;
+        }
+
+        if (teamMembers != null)
+        {
+            SetPlayerControlled(teamMembers[position]);
+        }
     }
 
     private void DetermineBoundaries(Teams team)
