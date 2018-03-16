@@ -84,6 +84,7 @@ public class PlayerController : AgentController
         if (aiController)
         {
             aiController.enabled = true;
+            _agent.SetController(aiController);
         }
 
         int teamCount = GameController.instance.RemainingTeamCount(_agent);

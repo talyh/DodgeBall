@@ -146,7 +146,6 @@ public class Ball : MonoBehaviour
     private Vector3 CalculateInitialVelocity(Vector3 targetPosition)
     {
         Vector3 displacement = targetPosition - this.transform.position;
-        float yDisplacement = displacement.y;
         displacement.y = 0.0f;
         float horizontalDisplacement = displacement.magnitude;
         if (horizontalDisplacement < Mathf.Epsilon)

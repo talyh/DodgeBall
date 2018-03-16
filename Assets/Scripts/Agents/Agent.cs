@@ -273,6 +273,9 @@ public class Agent : MonoBehaviour
 
             _ball.Carry(transform, _ballOffset);
         }
+
+        // Ensure players stand upright, even if they collide with each other
+        transform.rotation = Quaternion.Euler(new Vector3(0, transform.localEulerAngles.y, 0));
     }
 
     public bool GoingOut()

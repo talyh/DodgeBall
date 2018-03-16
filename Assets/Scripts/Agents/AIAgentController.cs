@@ -116,8 +116,6 @@ public class AIAgentController : AgentController
         {
             _agent.Stop();
             _agent.TurnBack();
-
-            Debug.LogFormat("{0} tried to go out. State: {1}, Target: {2}, Wandering Destination: {3}", name, _agent.currentState, _target, _wanderingDestination);
         }
     }
 
@@ -245,7 +243,6 @@ public class AIAgentController : AgentController
 
         Vector3 toDestination = destination - transform.position;
         toDestination.Normalize();
-        float lookAtToDestinationDot = Vector3.Dot(transform.forward, toDestination);
         float rightToDestinationDot = Vector3.Dot(transform.right, toDestination);
 
         bool shouldTurnRight = rightToDestinationDot > Mathf.Epsilon;
