@@ -253,6 +253,9 @@ MonoBehaviour:
   _ballOffset: {x: 1, y: 0, z: 1}
   _throwForce: 90
   _accuracy: 0.7
+  _defending: 0
+  _defenseTime: 3
+  _timeDefending: 0
   _reactionTime: 0.3
   _playerControlMarker: {fileID: 1211444596488000}
   TEMP_STATE: 

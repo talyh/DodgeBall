@@ -89,6 +89,11 @@ public class Agent : MonoBehaviour
         get { return _hit; }
     }
 
+    public bool _defending;
+    [SerializeField]
+    private float _defenseTime = 1;
+    public float _timeDefending;
+
     private StateManager _stateManager = new StateManager();
     public StateManager stateManager
     {
@@ -166,9 +171,10 @@ public class Agent : MonoBehaviour
         stateManager.Add(State.States.Out);
 
         stateManager.Add(new WanderToAttack());
+        stateManager.Add(new DefendToAttack());
         stateManager.Add(new AttackToWander());
-        stateManager.Add(new WanderToDefend());
         stateManager.Add(new DefendToWander());
+        stateManager.Add(new WanderToDefend());
         stateManager.Add(new AttackToOut());
         stateManager.Add(new DefendToOut());
         stateManager.Add(new WanderToOut());
@@ -269,6 +275,11 @@ public class Agent : MonoBehaviour
             }
 
             _ball.Carry(transform, _ballOffset);
+        }
+
+        if (currentState != _stateManager.GetState(State.States.Defend) || _timeDefending >= _defenseTime)
+        {
+            StopDefending();
         }
 
         // Ensure players stand upright, even if they collide with each other
@@ -506,6 +517,29 @@ public class Agent : MonoBehaviour
         }
     }
 
+    public void SetDefending()
+    {
+        if (!_defending)
+        {
+            _defending = true;
+        }
+        else
+        {
+            _timeDefending += Time.deltaTime;
+
+            if (_timeDefending >= _defenseTime)
+            {
+                StopDefending();
+            }
+        }
+    }
+
+    public void StopDefending()
+    {
+        _defending = false;
+        _timeDefending = 0;
+    }
+
     private void OnCollisionEnter(Collision coll)
     {
         if (_hit)
@@ -519,8 +553,10 @@ public class Agent : MonoBehaviour
 
             if (ball)
             {
-                if (!ball.thrown && !ball.taken && !hasBall)
+                if ((!ball.thrown && !ball.taken && !hasBall) || _defending)
                 {
+                    ball.Stop();
+                    Stop();
                     Pickup(ball);
                 }
                 else if (ball != _ball && this.team != GameController.instance.WhoThrewBall(ball).team)

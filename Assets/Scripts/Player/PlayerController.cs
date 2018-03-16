@@ -98,7 +98,6 @@ public class PlayerController : AgentController
 
     public override void Attack()
     {
-        // TODO determine if should throw
         _agent.Throw();
     }
 
@@ -137,7 +136,15 @@ public class PlayerController : AgentController
 
     public override void Defend()
     {
+        if (Input.GetKey(KeyCode.Space))
+        {
+            _agent.SetDefending();
+        }
 
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            _agent.StopDefending();
+        }
     }
 
     private void OnDisable()
