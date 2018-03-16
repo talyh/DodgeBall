@@ -31,6 +31,7 @@ public class AIAgentController : AgentController
     private List<Vector3> _pathNodes;
 
     private bool _waiting;
+    private float _timeAttacking;
     private float _timeWandering;
     private float _wanderingDuration = 5;
     public Vector3 _wanderingDestination;
@@ -61,8 +62,7 @@ public class AIAgentController : AgentController
 
         if (_agent.hit)
         {
-            _courtAreaMask = 1 << NavMesh.GetAreaFromName(GameController.Teams.Out.ToString())
-                | 1 << NavMesh.GetAreaFromName(_agent.team.ToString());
+            _courtAreaMask = NavMesh.AllAreas;
         }
     }
 
@@ -381,14 +381,14 @@ public class AIAgentController : AgentController
             return;
         }
 
-        float distanceToTarget = Vector3.Distance(transform.position, _target.position);
-
-        if (distanceToTarget >= _agent.minThrowingDistance)
+        if (_timeAttacking >= _agent.reactionTime)
         {
+            _timeAttacking = 0;
             Throw();
         }
         else
         {
+            _timeAttacking += Time.deltaTime;
             MoveToTarget();
         }
     }

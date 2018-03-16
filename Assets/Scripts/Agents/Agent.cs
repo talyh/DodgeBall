@@ -74,12 +74,9 @@ public class Agent : MonoBehaviour
     {
         get { return _throwForce; }
     }
+
     [SerializeField]
-    private float _minThrowingDistance = 2;
-    public float minThrowingDistance
-    {
-        get { return _minThrowingDistance; }
-    }
+    private float _accuracy = 0.5f;
 
     public Transform outArea
     {
@@ -102,27 +99,27 @@ public class Agent : MonoBehaviour
         get { return _stateManager.currentState; }
     }
 
-    private AgentController _controller;
-    public bool playerControlled
-    {
-        get { return _controller ? _controller.GetType() == typeof(PlayerController) : false; }
-    }
-
     [SerializeField]
     private float _reactionTime = 0.3f;
     public float reactionTime
     {
         get { return _reactionTime; }
     }
-    public Transform target
+
+    private AgentController _controller;
+    public bool playerControlled
     {
-        get { return !playerControlled && _controller ? (_controller as AIAgentController).target : null; }
+        get { return _controller ? _controller.GetType() == typeof(PlayerController) : false; }
     }
     [SerializeField]
     private GameObject _playerControlMarker;
     public GameObject playerControlMarker
     {
         get { return _playerControlMarker; }
+    }
+    public Transform target
+    {
+        get { return !playerControlled && _controller ? (_controller as AIAgentController).target : null; }
     }
 
     public string TEMP_STATE;
@@ -413,7 +410,8 @@ public class Agent : MonoBehaviour
 
         if (_ball)
         {
-            _ball.Throw(target, throwForce);
+            float throwAccuracy = Random.Range(_accuracy, 1);
+            _ball.Throw(target, throwForce * throwAccuracy);
             _ball = null;
         }
     }

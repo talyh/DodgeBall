@@ -252,7 +252,7 @@ MonoBehaviour:
   _ball: {fileID: 0}
   _ballOffset: {x: 1, y: 0, z: 1}
   _throwForce: 90
-  _minThrowingDistance: 5
+  _accuracy: 0.7
   _reactionTime: 0.3
   _playerControlMarker: {fileID: 1211444596488000}
   TEMP_STATE: 
