@@ -116,29 +116,14 @@ public class AIAgentController : AgentController
         {
             _agent.Stop();
             _agent.TurnBack();
+
+            Debug.LogFormat("{0} tried to go out. State: {1}, Target: {2}, Wandering Destination: {3}", name, _agent.currentState, _target, _wanderingDestination);
         }
     }
 
     private void MoveToTarget()
     {
-        // if (_agent.hit)
-        // {
-        // DetermineWalkMask();
-        // Vector3 targetPosition = _target.position;
-        // targetPosition.z -= (GameController.instance.teamSize - GameController.instance.RemainingTeamCount(_agent)) * _agent.transform.localScale.z;
-        // Debug.LogWarning(Time.frameCount + " >> " + _agent.team.ToString() + " remaning count: " + GameController.instance.RemainingTeamCount(_agent));
-        // Debug.LogWarning(name + "'s targePosition: " + targetPosition);
-        // DeterminePath(targetPosition);
-        // }
-        // else
-        // {
         DeterminePath(_target.position);
-
-        // if (_agent.debugMode)
-        // {
-        //     Supporting.Log(string.Format("{0} decided to move to {1} to throw at {2}", name, _target.position, _target.name));
-        // }
-        // }
 
         if (_pathNodes.Count > 0)
         {
@@ -197,72 +182,59 @@ public class AIAgentController : AgentController
                 Supporting.Log(string.Format("{0} arrived at {1}", name, destination));
             }
 
-            _pathNodes.Remove(destination);
-
-            Vector3 finalDestination = _pathNodes[_pathNodes.Count - 1];
-            distance = Vector3.Distance(transform.position, finalDestination);
-
-            if (_agent.debugMode)
+            if (_pathNodes.Contains(destination))
             {
-                Supporting.Log(string.Format("{0}'s final destination {1} is at {2} away", name, finalDestination, distance));
+                _pathNodes.Remove(destination);
             }
 
-            if (distance <= _destinationBuffer)
+            if (_pathNodes.Count >= 1)
             {
-                _agent.Stop();
-                if (_target)
+                Vector3 finalDestination = _pathNodes[_pathNodes.Count - 1];
+                distance = Vector3.Distance(transform.position, finalDestination);
+
+                if (_agent.debugMode)
                 {
-                    // Ball ball = _target.GetComponent<Ball>();
-                    // if (ball)
-                    // {
-                    //     _agent.Pickup(ball);
-                    // }
-                    // else if (_target == _agent.outArea)
-                    // {
-                    //     if (_agent.debugMode)
-                    //     {
-                    //         Supporting.Log(string.Format("{0} arrived at {1}", name, _agent.outArea.name));
-                    //     }
+                    Supporting.Log(string.Format("{0}'s final destination {1} is at {2} away", name, finalDestination, distance));
+                }
 
-                    //     NavMeshObstacle obstacle = gameObject.GetComponent<NavMeshObstacle>();
-                    //     obstacle.carving = true;
-
-                    //     _agent.SitOut();
-
-                    //     this.enabled = false;
-                    // }
-                    if (_agent.hit)
+                if (distance <= _destinationBuffer)
+                {
+                    _agent.Stop();
+                    if (_target)
                     {
-                        if (_agent.debugMode)
+                        if (_agent.hit)
                         {
-                            Supporting.Log(string.Format("{0} arrived at {1}", name, _agent.outArea.name));
+                            if (_agent.debugMode)
+                            {
+                                Supporting.Log(string.Format("{0} arrived at {1}", name, _agent.outArea.name));
+                            }
+
+                            NavMeshObstacle obstacle = gameObject.GetComponent<NavMeshObstacle>();
+                            obstacle.carving = true;
+
+                            _agent.SitOut();
+
+                            this.enabled = false;
                         }
-
-                        NavMeshObstacle obstacle = gameObject.GetComponent<NavMeshObstacle>();
-                        obstacle.carving = true;
-
-                        _agent.SitOut();
-
-                        this.enabled = false;
+                        else
+                        {
+                            Ball ball = _target.GetComponent<Ball>();
+                            if (ball)
+                            {
+                                _agent.Pickup(ball);
+                            }
+                        }
                     }
                     else
                     {
-                        Ball ball = _target.GetComponent<Ball>();
-                        if (ball)
+                        if (_agent.debugMode)
                         {
-                            _agent.Pickup(ball);
+                            Supporting.Log(string.Format("{0} distance to {1} is {2}", name, finalDestination, distance));
                         }
                     }
-                }
-                else
-                {
-                    if (_agent.debugMode)
-                    {
-                        Supporting.Log(string.Format("{0} distance to {1} is {2}", name, finalDestination, distance));
-                    }
-                }
 
-                return;
+                    return;
+                }
             }
         }
 
@@ -505,6 +477,5 @@ public class AIAgentController : AgentController
     private void OnDisable()
     {
         _agent.tookball -= ClearTarget;
-        // _agent.gotHit -= GoOut;
     }
 }

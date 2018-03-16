@@ -5,23 +5,9 @@ using UnityEngine;
 public class PlayerController : AgentController
 {
     [SerializeField]
-    private float _scanForBallDistance = 3;
-    public float scanForBallDistance
-    {
-        get { return _scanForBallDistance; }
-    }
-    [SerializeField]
     private float _scanForOpponentDistance = 40;
-    public float scanForOpponentDistance
-    {
-        get { return _scanForOpponentDistance; }
-    }
     [SerializeField]
     private float _scanningRadius = 10;
-    public float scanningRadius
-    {
-        get { return _scanningRadius; }
-    }
 
     private void Update()
     {
@@ -111,13 +97,13 @@ public class PlayerController : AgentController
 
     public override void Attack()
     {
-        // Determine if should throw
+        // TODO determine if should throw
         _agent.Throw();
     }
 
     public override void Throw()
     {
-        if (_agent.hasBall && Input.GetKeyDown(KeyCode.LeftControl))
+        if (_agent.hasBall && Input.GetKeyDown(KeyCode.Space))
         {
             Vector3 distance = _agent.transform.forward * _scanForOpponentDistance;
             LayerMask layermask = 1 << LayerMask.NameToLayer(GameController.Layers.Agent.ToString());
@@ -146,31 +132,6 @@ public class PlayerController : AgentController
 
     public override void Wander()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (!_agent.hasBall)
-            {
-                Vector3 distance = _agent.transform.forward * _scanForBallDistance;
-                LayerMask layermask = 1 << LayerMask.NameToLayer(GameController.Layers.Ball.ToString());
-
-                RaycastHit[] hits = Physics.SphereCastAll(_agent.transform.position, _scanningRadius, distance, layermask);
-
-                if (_agent.debugMode)
-                {
-                    Debug.DrawRay(_agent.transform.position, distance, Color.cyan);
-                }
-
-                foreach (RaycastHit hit in hits)
-                {
-                    Ball ball = hit.transform.GetComponent<Ball>();
-                    if (ball)
-                    {
-                        _agent.Pickup(ball);
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     public override void Defend()

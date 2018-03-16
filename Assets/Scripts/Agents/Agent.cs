@@ -235,6 +235,11 @@ public class Agent : MonoBehaviour
         //     }
         // }
 
+        if (_stateManager.currentState == null)
+        {
+            Debug.Break();
+        }
+
         TEMP_STATE = _stateManager.currentState.ToString();
         TEMP_COND_AGENT_HAS_BALL = _stateManager.GetCondition(Condition.Conditions.AgentHasBall).IsTrue();
         TEMP_COND_AGENT_HIT = _stateManager.GetCondition(Condition.Conditions.AgentHit).IsTrue();
