@@ -376,8 +376,14 @@ public class AIAgentController : AgentController
 
     public override void Attack()
     {
-        if (!_agent.hasBall || _target.tag != GameController.Tags.Agent.ToString())
+        if (!_agent.hasBall || (_target && _target.tag != GameController.Tags.Agent.ToString()))
         {
+            return;
+        }
+
+        if (!_target)
+        {
+            Scan();
             return;
         }
 
@@ -440,8 +446,12 @@ public class AIAgentController : AgentController
     private void Defend(float reactionTime)
     {
         _agent.Stop();
-        WaitABit(reactionTime);
-        Wander();
+        WaitABit(UnityEngine.Random.Range(0, _agent.reactionTime));
+
+        if (!_waiting)
+        {
+            _agent.SetDefending();
+        }
     }
 
     private void OnDrawGizmos()

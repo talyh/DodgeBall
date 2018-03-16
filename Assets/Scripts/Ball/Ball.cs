@@ -79,6 +79,7 @@ public class Ball : MonoBehaviour
 
     public void Carry(Transform agent, Vector3 offset)
     {
+        _thrown = false;
         _rb.isKinematic = true;
         _collider.enabled = false;
         transform.rotation = agent.rotation;

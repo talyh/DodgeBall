@@ -256,7 +256,7 @@ MonoBehaviour:
   _defending: 0
   _defenseTime: 3
   _timeDefending: 0
-  _reactionTime: 0.3
+  _reactionTime: 0.4
   _playerControlMarker: {fileID: 1211444596488000}
   TEMP_STATE: 
   TEMP_COND_AGENT_HAS_BALL: 0
