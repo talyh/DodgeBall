@@ -92,7 +92,6 @@ public class AIAgentController : AgentController
 
     public void ClearTarget()
     {
-        Debug.LogFormat("{0} losing track of {1}", name, _target);
         _target = null;
     }
 

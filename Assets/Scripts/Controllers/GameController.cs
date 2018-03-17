@@ -11,6 +11,12 @@ public class GameController : Singleton<GameController>
         get { return _gameStarted; }
     }
 
+    private bool _gameOver;
+    public bool gameOver
+    {
+        get { return _gameOver; }
+    }
+
     public enum Teams { None = -1, Red = 0, Blue, Out }
     public enum Tags { Ball = 0, Agent, MiddleLine }
     public enum Layers { Ball, Agent }
@@ -302,6 +308,7 @@ public class GameController : Singleton<GameController>
                 {
                     _redTeam.Remove(teamMember);
                     SetScore(Teams.Blue, teamSize - _redTeam.Count);
+                    CheckForwWin(_redTeam);
                 }
                 else
                 {
@@ -313,6 +320,7 @@ public class GameController : Singleton<GameController>
                 {
                     _blueTeam.Remove(teamMember);
                     SetScore(Teams.Red, teamSize - _blueTeam.Count);
+                    CheckForwWin(_blueTeam);
                 }
                 else
                 {
@@ -337,6 +345,28 @@ public class GameController : Singleton<GameController>
         }
 
         CanvasController.instance.SetScore(team, score);
+    }
+
+    private void CheckForwWin(List<Agent> scoredAgainst)
+    {
+        if (scoredAgainst.Count <= 0)
+        {
+            _gameOver = true;
+
+
+            if (scoredAgainst == _redTeam)
+            {
+                CanvasController.instance.ShowWinner(Teams.Blue);
+            }
+            else if (scoredAgainst == _blueTeam)
+            {
+                CanvasController.instance.ShowWinner(Teams.Red);
+            }
+            else
+            {
+                CanvasController.instance.ShowWinner(Teams.None);
+            }
+        }
     }
 
     private bool CheckTeamForMember(Agent teamMember, ref List<Agent> team)

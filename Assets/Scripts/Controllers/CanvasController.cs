@@ -12,6 +12,12 @@ public class CanvasController : Singleton<CanvasController>
     private Text _redScore;
     [SerializeField]
     private Text _blueScore;
+    [SerializeField]
+    private Text _winner;
+    [SerializeField]
+    private Color _red;
+    [SerializeField]
+    private Color _blue;
 
     public void SetScore(GameController.Teams team, int score)
     {
@@ -45,5 +51,25 @@ public class CanvasController : Singleton<CanvasController>
         }
 
         _teamSelection.SetActive(false);
+    }
+
+    public void ShowWinner(GameController.Teams winner)
+    {
+        _winner.text = string.Format("{0} Wins!", winner.ToString());
+
+        switch (winner)
+        {
+            case GameController.Teams.Red:
+                _winner.color = _red;
+                break;
+            case GameController.Teams.Blue:
+                _winner.color = _blue;
+                break;
+            default:
+                Supporting.Log(string.Format("Couldn't resolve team for {0}", winner), 1);
+                break;
+        }
+
+        _winner.transform.parent.gameObject.SetActive(true);
     }
 }

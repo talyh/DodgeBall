@@ -11,7 +11,7 @@ public class PlayerController : AgentController
 
     private void Update()
     {
-        if (!GameController.instance.gameStarted)
+        if (!GameController.instance.gameStarted || GameController.instance.gameOver)
         {
             return;
         }
