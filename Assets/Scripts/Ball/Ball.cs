@@ -36,6 +36,12 @@ public class Ball : MonoBehaviour
         get { return _courtSide; }
     }
 
+    [SerializeField]
+    private float _impulseOnIdle;
+    [SerializeField]
+    private float _maxIdleTime;
+    private float _idleTime;
+
     private void Start()
     {
         Setup();
@@ -59,6 +65,11 @@ public class Ball : MonoBehaviour
 
     private void Update()
     {
+        if (!GameController.instance.gameStarted)
+        {
+            return;
+        }
+
         if (thrown)
         {
             _timeOnAir += Time.deltaTime;
@@ -74,6 +85,16 @@ public class Ball : MonoBehaviour
         if (_courtSide == GameController.Teams.Out || transform.position.y < -1)
         {
             Respawn();
+        }
+
+        if (_rb.velocity.magnitude <= 0.1f && _idleTime >= _maxIdleTime)
+        {
+            _rb.AddForce(transform.forward * _impulseOnIdle, ForceMode.Impulse);
+            _idleTime = 0;
+        }
+        else
+        {
+            _idleTime += Time.deltaTime;
         }
     }
 
