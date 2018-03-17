@@ -4,16 +4,19 @@ using UnityEngine;
 
 public class CourtBounds : MonoBehaviour
 {
+    private void OnTriggerEnter(Collider coll)
+    {
+        if (coll.gameObject.tag == GameController.Tags.Agent.ToString())
+        {
+            coll.GetComponent<Agent>().CrossLine();
+        }
+    }
 
-    private void OnTriggerExit(Collider coll)
+    private void OnTriggerStay(Collider coll)
     {
         if (coll.gameObject.tag == GameController.Tags.Ball.ToString())
         {
             coll.GetComponent<Ball>().Respawn();
-        }
-        else if (coll.gameObject.tag == GameController.Tags.Agent.ToString())
-        {
-            coll.GetComponent<Agent>().CrossLine();
         }
     }
 }

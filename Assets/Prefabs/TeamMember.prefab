@@ -248,7 +248,7 @@ MonoBehaviour:
   _angularMaxSpeed: 5
   _rb: {fileID: 54261337859368294}
   _meshRenderer: {fileID: 23352743901423646}
-  _maxDistanceToBoundaries: 0.5
+  _maxDistanceToBoundaries: 2
   _ball: {fileID: 0}
   _ballOffset: {x: 1, y: 0, z: 1}
   _throwForce: 90

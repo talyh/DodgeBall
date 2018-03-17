@@ -87,4 +87,9 @@ public struct Boundaries
     public float maxX;
     public float minZ;
     public float maxZ;
+
+    public override string ToString()
+    {
+        return string.Format("Boundaries: x {0} to {1} /// z {2} to {3}", minX, maxX, minZ, maxZ);
+    }
 }

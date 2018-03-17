@@ -71,7 +71,7 @@ public class Ball : MonoBehaviour
 
         DetermineCourtSide();
 
-        if (_courtSide == GameController.Teams.Out)
+        if (_courtSide == GameController.Teams.Out || transform.position.y < -1)
         {
             Respawn();
         }

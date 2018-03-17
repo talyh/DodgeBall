@@ -130,10 +130,7 @@ public class GameController : Singleton<GameController>
     {
         for (int i = 0; i < _teamSize; i++)
         {
-            float randomX = Random.Range(GetTeamBoundaries(team).minX, GetTeamBoundaries(team).maxX);
-            float randomZ = Random.Range(GetTeamBoundaries(team).minZ, GetTeamBoundaries(team).maxZ);
-            Vector3 randomPosition = new Vector3(randomX, 0, randomZ);
-
+            Vector3 randomPosition = GetRandomPositionInCourt(team);
             float randomRotation = Random.Range(0, 360);
 
             GameObject teamMember = Instantiate(_teamMemberPrefab, randomPosition, Quaternion.Euler(new Vector3(0, randomRotation, 0)));
@@ -152,6 +149,37 @@ public class GameController : Singleton<GameController>
 
             agent.name = string.Format("{0} player {1}", team, i);
         }
+    }
+
+    private Vector3 GetRandomPositionInCourt(Teams courtSide)
+    {
+
+        float randomX = Random.Range(GetTeamBoundaries(courtSide).minX + Agent.maxDistanceToBoundaries, GetTeamBoundaries(courtSide).maxX - Agent.maxDistanceToBoundaries);
+        float randomZ = Random.Range(GetTeamBoundaries(courtSide).minZ + Agent.maxDistanceToBoundaries, GetTeamBoundaries(courtSide).maxZ - Agent.maxDistanceToBoundaries);
+
+        List<Agent> team = null;
+        switch (courtSide)
+        {
+            case Teams.Red:
+                team = _redTeam;
+                break;
+            case Teams.Blue:
+                team = _blueTeam;
+                break;
+            default:
+                Supporting.Log(string.Format("Couldn't resolve team for {0}", courtSide), 1);
+                break;
+
+        }
+
+        Vector3 randomPosition = new Vector3(randomX, 0, randomZ);
+
+        if (team.Find(agent => Vector3.Distance(agent.transform.position, randomPosition) < 3))
+        {
+            return GetRandomPositionInCourt(courtSide);
+        }
+
+        return randomPosition;
     }
 
     public void SetPlayerTeam(Teams team)

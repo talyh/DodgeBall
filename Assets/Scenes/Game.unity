@@ -982,8 +982,11 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 929807045}
-  - component: {fileID: 929807046}
   - component: {fileID: 929807048}
+  - component: {fileID: 929807051}
+  - component: {fileID: 929807050}
+  - component: {fileID: 929807049}
+  - component: {fileID: 929807046}
   - component: {fileID: 929807047}
   m_Layer: 0
   m_Name: Bounds
@@ -991,7 +994,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &929807045
 Transform:
   m_ObjectHideFlags: 0
@@ -1015,8 +1018,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 10, y: 150, z: 10}
-  m_Center: {x: 0, y: 50, z: 0}
+  m_Size: {x: 0.5, y: 1, z: 11}
+  m_Center: {x: -5.3, y: 0, z: 0}
 --- !u!114 &929807047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1038,8 +1041,44 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 10, y: 1, z: 0.15}
+  m_Size: {x: 11, y: 1, z: 0.25}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &929807049
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 929807044}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.5, y: 1, z: 11}
+  m_Center: {x: 5.3, y: 0, z: 0}
+--- !u!65 &929807050
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 929807044}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 11, y: 1, z: 0.5}
+  m_Center: {x: 0, y: 0, z: -5.3}
+--- !u!65 &929807051
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 929807044}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 11, y: 1, z: 0.5}
+  m_Center: {x: 0, y: 0, z: 5.3}
 --- !u!1 &1050830661
 GameObject:
   m_ObjectHideFlags: 0
@@ -1106,7 +1145,7 @@ MonoBehaviour:
   _blueTeamArea: {fileID: 815377561}
   _blueTeamOutArea: {fileID: 1380076554}
   _defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
-  _teamSize: 6
+  _teamSize: 10
   _teamMemberPrefab: {fileID: 1298984379155410, guid: 76ba17574332f46759d12ecef16033e3,
     type: 2}
   _playerController: {fileID: 1078202747}

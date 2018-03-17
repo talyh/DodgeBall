@@ -54,7 +54,7 @@ public class Agent : MonoBehaviour
 
     private Boundaries _boundaries;
     [SerializeField]
-    private float _maxDistanceToBoundaries = 2;
+    static public float maxDistanceToBoundaries = 5;
 
     public Ball _ball;
     public Ball ball
@@ -126,12 +126,6 @@ public class Agent : MonoBehaviour
     {
         get { return !playerControlled && _controller ? (_controller as AIAgentController).target : null; }
     }
-
-    public string TEMP_STATE;
-    public bool TEMP_COND_AGENT_HAS_BALL;
-    public bool TEMP_COND_AGENT_HIT;
-    public bool TEMP_COND_BALL_THROWN;
-    public bool TEMP_COND_TARGETTING_OPPONENT;
 
     private void Start()
     {
@@ -243,12 +237,6 @@ public class Agent : MonoBehaviour
             Debug.Break();
         }
 
-        TEMP_STATE = _stateManager.currentState.ToString();
-        TEMP_COND_AGENT_HAS_BALL = _stateManager.GetCondition(Condition.Conditions.AgentHasBall).IsTrue();
-        TEMP_COND_AGENT_HIT = _stateManager.GetCondition(Condition.Conditions.AgentHit).IsTrue();
-        TEMP_COND_BALL_THROWN = _stateManager.GetCondition(Condition.Conditions.BallThrownByOpponent).IsTrue();
-        TEMP_COND_TARGETTING_OPPONENT = _stateManager.GetCondition(Condition.Conditions.TargettingOpponent).IsTrue();
-
         if (!GameController.instance.gameStarted)
         {
             return;
@@ -296,10 +284,17 @@ public class Agent : MonoBehaviour
         float x = transform.position.x + transform.forward.x;
         float z = transform.position.z + transform.forward.z;
 
-        if (x - _maxDistanceToBoundaries < _boundaries.minX
-            || x + _maxDistanceToBoundaries > _boundaries.maxX
-            || z - _maxDistanceToBoundaries < _boundaries.minZ
-            || z + _maxDistanceToBoundaries > _boundaries.maxZ)
+        // Debug.Log("-------------- FRAME " + Time.frameCount + "-----------------");
+        // Debug.Log(_boundaries);
+        // Debug.Log("resulting x " + (transform.position.x + transform.forward.x));
+        // Debug.Log("exiting in x " + (x - _maxDistanceToBoundaries < _boundaries.minX) + " /// " + (x + _maxDistanceToBoundaries > _boundaries.maxX));
+        // Debug.Log("resulting z " + (transform.position.z + transform.forward.z));
+        // Debug.Log("exiting in z " + (z - _maxDistanceToBoundaries < _boundaries.minZ) + " /// " + (z + _maxDistanceToBoundaries > _boundaries.maxZ));
+
+        if (x - maxDistanceToBoundaries < _boundaries.minX
+            || x + maxDistanceToBoundaries > _boundaries.maxX
+            || z - maxDistanceToBoundaries < _boundaries.minZ
+            || z + maxDistanceToBoundaries > _boundaries.maxZ)
         {
             if (debugMode)
             {
