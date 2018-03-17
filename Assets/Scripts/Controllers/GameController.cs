@@ -498,18 +498,21 @@ public class GameController : Singleton<GameController>
             _balls[ball] = agent;
         }
 
-        foreach (Agent teamMember in _redTeam)
+        if (gameStarted)
         {
-            if (teamMember.target == ball.transform && !teamMember.playerControlled)
+            foreach (Agent teamMember in _redTeam)
             {
-                teamMember.GetComponent<AIAgentController>().ClearTarget();
+                if (teamMember.target == ball.transform && !teamMember.playerControlled)
+                {
+                    teamMember.GetComponent<AIAgentController>().ClearTarget();
+                }
             }
-        }
-        foreach (Agent teamMember in _blueTeam)
-        {
-            if (teamMember.target == ball.transform && !teamMember.playerControlled)
+            foreach (Agent teamMember in _blueTeam)
             {
-                teamMember.GetComponent<AIAgentController>().ClearTarget();
+                if (teamMember.target == ball.transform && !teamMember.playerControlled)
+                {
+                    teamMember.GetComponent<AIAgentController>().ClearTarget();
+                }
             }
         }
     }
