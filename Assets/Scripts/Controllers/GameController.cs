@@ -121,7 +121,7 @@ public class GameController : Singleton<GameController>
     private void Start()
     {
         Setup();
-        GenerateTeams();
+        StartGame();
     }
 
     private void Setup()
@@ -150,6 +150,41 @@ public class GameController : Singleton<GameController>
         {
             GameObject.FindObjectOfType<PlayerController>();
         }
+    }
+
+    private void StartGame()
+    {
+        if (_gameStarted)
+        {
+            _redTeam = new List<Agent>();
+            _blueTeam = new List<Agent>();
+        }
+
+        GameObject[] existingAgents = GameObject.FindGameObjectsWithTag(Tags.Agent.ToString());
+        if (existingAgents.Length > 0)
+        {
+            foreach (GameObject agent in existingAgents)
+            {
+                Destroy(agent);
+            }
+        }
+
+        if (_balls.Count > 0)
+        {
+            foreach (KeyValuePair<Ball, Agent> entry in _balls.ToArray())
+            {
+                entry.Key.Respawn();
+                _balls[entry.Key] = null;
+            }
+        }
+
+        GenerateTeams();
+
+        _gameStarted = false;
+        _gameOver = false;
+
+        CanvasController.instance.StartGame();
+
     }
 
     private void GenerateTeams()
@@ -198,8 +233,6 @@ public class GameController : Singleton<GameController>
                         generatedAngularSpeed: randomAngularSpeed);
 
         agent.name = string.Format("{0} player {1}", team, position);
-
-        Debug.LogFormat("{0} generated with: \n randomThrowForce: {1} \n randomAccuracy: {2} \n randomReactionTime: {3} \n randomDefenseTime: {4} \n randomLinearSpeed: {5} \n randomAngularSpeed: {6}", agent.name, randomThrowForce, randomAccuracy, randomReactionTime, randomDefenseTime, randomLinearSpeed, randomAngularSpeed);
 
         return agent;
     }
@@ -414,6 +447,21 @@ public class GameController : Singleton<GameController>
             {
                 CanvasController.instance.ShowWinner(Teams.None);
             }
+        }
+
+        StartCoroutine(RestartGame());
+    }
+
+    private IEnumerator RestartGame()
+    {
+        if (_gameOver)
+        {
+            yield return new WaitForSeconds(5);
+            StartGame();
+        }
+        else
+        {
+            yield return null;
         }
     }
 

@@ -19,6 +19,15 @@ public class CanvasController : Singleton<CanvasController>
     [SerializeField]
     private Color _blue;
 
+    public void StartGame()
+    {
+        _redScore.text = 0.ToString();
+        _blueScore.text = 0.ToString();
+
+        _winner.transform.parent.gameObject.SetActive(false);
+        _teamSelection.SetActive(true);
+    }
+
     public void SetScore(GameController.Teams team, int score)
     {
         switch (team)

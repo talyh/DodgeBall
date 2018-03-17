@@ -1350,8 +1350,8 @@ MonoBehaviour:
   _baseReactionTimeMax: 1
   _baseDefenseTimeMin: 0.5
   _baseDefenseTimeMax: 2
-  _baseLinearSpeedMin: 3.5
-  _baseLinearSpeedMax: 7
+  _baseLinearSpeedMin: 5
+  _baseLinearSpeedMax: 10
   _baseAngularSpeedMin: 3.5
   _baseAngularSpeedMax: 5
 --- !u!4 &1078202746

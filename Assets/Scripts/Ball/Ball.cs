@@ -60,7 +60,6 @@ public class Ball : MonoBehaviour
         }
 
         _spawnPosition = transform.position;
-        GameController.instance.KeepTrack(this, null);
     }
 
     private void Update()
@@ -136,6 +135,7 @@ public class Ball : MonoBehaviour
         Stop();
 
         transform.position = _spawnPosition;
+        GameController.instance.KeepTrack(this, null);
         _thrown = false;
     }
 
