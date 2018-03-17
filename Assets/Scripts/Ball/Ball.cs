@@ -184,14 +184,6 @@ public class Ball : MonoBehaviour
         }
     }
 
-    // private void OnDisable()
-    // {
-    //     if (_target)
-    //     {
-    //         _target.GetComponent<Agent>().gotHit -= Hit;
-    //     }
-    // }
-
     private void DetermineCourtSide()
     {
         if (transform.position.z > GameController.instance.redTeamAreaBoundaries.minZ

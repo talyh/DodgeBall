@@ -1140,12 +1140,14 @@ MonoBehaviour:
   _redTeamMaterial: {fileID: 2100000, guid: b6c8f80a0d8284226a9a085f13d2eeaf, type: 2}
   _redTeamArea: {fileID: 1613475231}
   _redTeamOutArea: {fileID: 1865652030}
+  _redTeam: []
   _blueTeamStructure: {fileID: 1050830661}
   _blueTeamMaterial: {fileID: 2100000, guid: 5960e2e52d964490e80a6a13631a1622, type: 2}
   _blueTeamArea: {fileID: 815377561}
   _blueTeamOutArea: {fileID: 1380076554}
+  _blueTeam: []
   _defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
-  _teamSize: 10
+  _teamSize: 6
   _teamMemberPrefab: {fileID: 1298984379155410, guid: 76ba17574332f46759d12ecef16033e3,
     type: 2}
   _playerController: {fileID: 1078202747}

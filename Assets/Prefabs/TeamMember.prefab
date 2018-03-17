@@ -248,21 +248,14 @@ MonoBehaviour:
   _angularMaxSpeed: 5
   _rb: {fileID: 54261337859368294}
   _meshRenderer: {fileID: 23352743901423646}
-  _maxDistanceToBoundaries: 2
   _ball: {fileID: 0}
   _ballOffset: {x: 1, y: 0, z: 1}
   _throwForce: 90
-  _accuracy: 0.7
-  _defending: 0
+  _accuracy: 0.5
   _defenseTime: 3
-  _timeDefending: 0
-  _reactionTime: 0.4
+  _reactionTime: 0.3
+  _controller: {fileID: 0}
   _playerControlMarker: {fileID: 1211444596488000}
-  TEMP_STATE: 
-  TEMP_COND_AGENT_HAS_BALL: 0
-  TEMP_COND_AGENT_HIT: 0
-  TEMP_COND_BALL_THROWN: 0
-  TEMP_COND_TARGETTING_OPPONENT: 0
 --- !u!114 &114368980718588580
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -279,7 +272,6 @@ MonoBehaviour:
   _scanRadiusForBall: 20
   _scanRadiusForOpponent: 100
   _destinationBuffer: 2
-  _wanderingDestination: {x: 0, y: 0, z: 0}
 --- !u!114 &114578220841138542
 MonoBehaviour:
   m_ObjectHideFlags: 1
