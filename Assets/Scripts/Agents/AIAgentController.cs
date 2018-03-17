@@ -34,7 +34,7 @@ public class AIAgentController : AgentController
     private float _timeAttacking;
     private float _timeWandering;
     private float _wanderingDuration = 5;
-    public Vector3 _wanderingDestination;
+    private Vector3 _wanderingDestination;
 
     private void Start()
     {
@@ -90,8 +90,9 @@ public class AIAgentController : AgentController
         }
     }
 
-    private void ClearTarget()
+    public void ClearTarget()
     {
+        Debug.LogFormat("{0} losing track of {1}", name, _target);
         _target = null;
     }
 
@@ -366,6 +367,12 @@ public class AIAgentController : AgentController
 
     private bool ValidTarget(Ball ball)
     {
+        if (_agent.debugMode)
+        {
+            Supporting.Log(string.Format("{0} assessing ball", name));
+        }
+
+
         if (ball.courtSide != _agent.team || ball.taken)
         {
             return false;

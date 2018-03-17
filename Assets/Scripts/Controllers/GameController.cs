@@ -33,7 +33,7 @@ public class GameController : Singleton<GameController>
     {
         get { return _redTeamAreaBoundaries; }
     }
-    private List<Agent> _redTeam;
+    public List<Agent> _redTeam;
 
     [Header("Blue Team")]
     [SerializeField]
@@ -53,7 +53,7 @@ public class GameController : Singleton<GameController>
     {
         get { return _blueTeamAreaBoundaries; }
     }
-    private List<Agent> _blueTeam;
+    public List<Agent> _blueTeam;
 
 
     [Header("General")]
@@ -418,6 +418,29 @@ public class GameController : Singleton<GameController>
         else
         {
             _balls[ball] = agent;
+        }
+
+        foreach (Agent teamMember in _redTeam)
+        {
+            if (teamMember.target == ball.transform && !teamMember.playerControlled)
+            {
+                teamMember.GetComponent<AIAgentController>().ClearTarget();
+            }
+        }
+        foreach (Agent teamMember in _blueTeam)
+        {
+            Debug.LogFormat("{0} teamMember.target == ball: {1}", teamMember.name, teamMember.target == ball);
+            Debug.LogFormat("{0} !teamMember.playerControlled: {1}", teamMember.name, !teamMember.playerControlled);
+
+            if (teamMember.target == ball.transform && !teamMember.playerControlled)
+            {
+                teamMember.GetComponent<AIAgentController>().ClearTarget();
+            }
+        }
+
+        foreach (KeyValuePair<Ball, Agent> entry in _balls)
+        {
+            Debug.Log(entry.Key.ToString() + " " + entry.Value.ToString());
         }
     }
 

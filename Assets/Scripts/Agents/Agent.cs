@@ -89,10 +89,10 @@ public class Agent : MonoBehaviour
         get { return _hit; }
     }
 
-    public bool _defending;
+    private bool _defending;
     [SerializeField]
     private float _defenseTime = 1;
-    public float _timeDefending;
+    private float _timeDefending;
 
     private StateManager _stateManager = new StateManager();
     public StateManager stateManager
@@ -111,7 +111,7 @@ public class Agent : MonoBehaviour
         get { return _reactionTime; }
     }
 
-    private AgentController _controller;
+    public AgentController _controller;
     public bool playerControlled
     {
         get { return _controller ? _controller.GetType() == typeof(PlayerController) : false; }
@@ -283,13 +283,6 @@ public class Agent : MonoBehaviour
 
         float x = transform.position.x + transform.forward.x;
         float z = transform.position.z + transform.forward.z;
-
-        // Debug.Log("-------------- FRAME " + Time.frameCount + "-----------------");
-        // Debug.Log(_boundaries);
-        // Debug.Log("resulting x " + (transform.position.x + transform.forward.x));
-        // Debug.Log("exiting in x " + (x - _maxDistanceToBoundaries < _boundaries.minX) + " /// " + (x + _maxDistanceToBoundaries > _boundaries.maxX));
-        // Debug.Log("resulting z " + (transform.position.z + transform.forward.z));
-        // Debug.Log("exiting in z " + (z - _maxDistanceToBoundaries < _boundaries.minZ) + " /// " + (z + _maxDistanceToBoundaries > _boundaries.maxZ));
 
         if (x - maxDistanceToBoundaries < _boundaries.minX
             || x + maxDistanceToBoundaries > _boundaries.maxX
