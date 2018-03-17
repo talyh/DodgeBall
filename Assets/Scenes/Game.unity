@@ -1215,17 +1215,27 @@ MonoBehaviour:
   _redTeamMaterial: {fileID: 2100000, guid: b6c8f80a0d8284226a9a085f13d2eeaf, type: 2}
   _redTeamArea: {fileID: 1613475231}
   _redTeamOutArea: {fileID: 1865652030}
-  _redTeam: []
   _blueTeamStructure: {fileID: 1050830661}
   _blueTeamMaterial: {fileID: 2100000, guid: 5960e2e52d964490e80a6a13631a1622, type: 2}
   _blueTeamArea: {fileID: 815377561}
   _blueTeamOutArea: {fileID: 1380076554}
-  _blueTeam: []
   _defaultMaterial: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
-  _teamSize: 6
+  _teamSize: 2
   _teamMemberPrefab: {fileID: 1298984379155410, guid: 76ba17574332f46759d12ecef16033e3,
     type: 2}
   _playerController: {fileID: 1078202747}
+  _baseThrowForceMin: 60
+  _baseThrowForceMax: 90
+  _baseAccuracyMin: 0.9
+  _baseAccuracyMax: 1
+  _baseReactionTimeMin: 0
+  _baseReactionTimeMax: 1
+  _baseDefenseTimeMin: 0.5
+  _baseDefenseTimeMax: 2
+  _baseLinearSpeedMin: 3.5
+  _baseLinearSpeedMax: 7
+  _baseAngularSpeedMin: 3.5
+  _baseAngularSpeedMax: 5
 --- !u!4 &1078202746
 Transform:
   m_ObjectHideFlags: 0
@@ -1571,7 +1581,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -99.99999, y: 42.7}
+  m_AnchoredPosition: {x: -100, y: 42.7}
   m_SizeDelta: {x: 137.4, y: 40}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &1536716223

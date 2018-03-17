@@ -5,7 +5,6 @@ using UnityEngine;
 
 public abstract class AgentController : MonoBehaviour
 {
-    [SerializeField]
     protected Agent _agent;
 
     public abstract void Wander();

@@ -6,6 +6,8 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer))]
 public class Agent : MonoBehaviour
 {
+    public const float MAX_DISTANCE_TO_BOUNDARIES = 5;
+
     public delegate void TookBall();
     public event TookBall tookball;
 
@@ -53,10 +55,8 @@ public class Agent : MonoBehaviour
     private MeshRenderer _meshRenderer;
 
     private Boundaries _boundaries;
-    [SerializeField]
-    static public float maxDistanceToBoundaries = 5;
 
-    public Ball _ball;
+    private Ball _ball;
     public Ball ball
     {
         get { return _ball; }
@@ -68,14 +68,14 @@ public class Agent : MonoBehaviour
     [SerializeField]
     private Vector3 _ballOffset;
 
-    [SerializeField]
+    // [SerializeField]
     private float _throwForce = 15;
     public float throwForce
     {
         get { return _throwForce; }
     }
 
-    [SerializeField]
+    // [SerializeField]
     private float _accuracy = 0.5f;
 
     public Transform outArea
@@ -90,7 +90,7 @@ public class Agent : MonoBehaviour
     }
 
     private bool _defending;
-    [SerializeField]
+    // [SerializeField]
     private float _defenseTime = 1;
     private float _timeDefending;
 
@@ -104,14 +104,14 @@ public class Agent : MonoBehaviour
         get { return _stateManager.currentState; }
     }
 
-    [SerializeField]
+    // [SerializeField]
     private float _reactionTime = 0.3f;
     public float reactionTime
     {
         get { return _reactionTime; }
     }
 
-    public AgentController _controller;
+    private AgentController _controller;
     public bool playerControlled
     {
         get { return _controller ? _controller.GetType() == typeof(PlayerController) : false; }
@@ -183,7 +183,19 @@ public class Agent : MonoBehaviour
         _stateManager.SetInitialState(State.States.Wander);
     }
 
-    public void SetTeam(GameController.Teams team)
+    public void Configure(GameController.Teams team, float generatedThrowForce, float generatedAccuracy, float generatedReactionTime, float generatedDefenseTime, float generatedLinearSpeed, float generatedAngularSpeed)
+    {
+        _throwForce = generatedThrowForce;
+        _accuracy = generatedAccuracy;
+        _reactionTime = generatedReactionTime;
+        _defenseTime = generatedDefenseTime;
+        _linearMaxSpeed = generatedLinearSpeed;
+        _angularMaxSpeed = generatedAngularSpeed;
+
+        SetTeam(team);
+    }
+
+    private void SetTeam(GameController.Teams team)
     {
         _team = team;
         EnrollInTeam();
@@ -284,10 +296,10 @@ public class Agent : MonoBehaviour
         float x = transform.position.x + transform.forward.x;
         float z = transform.position.z + transform.forward.z;
 
-        if (x - maxDistanceToBoundaries < _boundaries.minX
-            || x + maxDistanceToBoundaries > _boundaries.maxX
-            || z - maxDistanceToBoundaries < _boundaries.minZ
-            || z + maxDistanceToBoundaries > _boundaries.maxZ)
+        if (x - MAX_DISTANCE_TO_BOUNDARIES < _boundaries.minX
+            || x + MAX_DISTANCE_TO_BOUNDARIES > _boundaries.maxX
+            || z - MAX_DISTANCE_TO_BOUNDARIES < _boundaries.minZ
+            || z + MAX_DISTANCE_TO_BOUNDARIES > _boundaries.maxZ)
         {
             if (debugMode)
             {

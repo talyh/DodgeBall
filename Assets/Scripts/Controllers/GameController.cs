@@ -39,7 +39,7 @@ public class GameController : Singleton<GameController>
     {
         get { return _redTeamAreaBoundaries; }
     }
-    public List<Agent> _redTeam;
+    private List<Agent> _redTeam;
 
     [Header("Blue Team")]
     [SerializeField]
@@ -59,7 +59,7 @@ public class GameController : Singleton<GameController>
     {
         get { return _blueTeamAreaBoundaries; }
     }
-    public List<Agent> _blueTeam;
+    private List<Agent> _blueTeam;
 
 
     [Header("General")]
@@ -91,6 +91,32 @@ public class GameController : Singleton<GameController>
     private Dictionary<Ball, Agent> _balls;
 
     private Dictionary<Teams, int> _scores;
+
+    [Header("Team Generation")]
+    [SerializeField]
+    private float _baseThrowForceMin;
+    [SerializeField]
+    private float _baseThrowForceMax;
+    [SerializeField]
+    private float _baseAccuracyMin;
+    [SerializeField]
+    private float _baseAccuracyMax;
+    [SerializeField]
+    private float _baseReactionTimeMin;
+    [SerializeField]
+    private float _baseReactionTimeMax;
+    [SerializeField]
+    private float _baseDefenseTimeMin;
+    [SerializeField]
+    private float _baseDefenseTimeMax;
+    [SerializeField]
+    private float _baseLinearSpeedMin;
+    [SerializeField]
+    private float _baseLinearSpeedMax;
+    [SerializeField]
+    private float _baseAngularSpeedMin;
+    [SerializeField]
+    private float _baseAngularSpeedMax;
 
     private void Start()
     {
@@ -136,13 +162,7 @@ public class GameController : Singleton<GameController>
     {
         for (int i = 0; i < _teamSize; i++)
         {
-            Vector3 randomPosition = GetRandomPositionInCourt(team);
-            float randomRotation = Random.Range(0, 360);
-
-            GameObject teamMember = Instantiate(_teamMemberPrefab, randomPosition, Quaternion.Euler(new Vector3(0, randomRotation, 0)));
-            Agent agent = teamMember.GetComponent<Agent>();
-
-            agent.SetTeam(team);
+            Agent teamMember = GenerateTeamMember(team, i);
 
             if (team == Teams.Red)
             {
@@ -152,16 +172,44 @@ public class GameController : Singleton<GameController>
             {
                 teamMember.transform.parent = _blueTeamStructure.transform;
             }
-
-            agent.name = string.Format("{0} player {1}", team, i);
         }
     }
+
+    private Agent GenerateTeamMember(Teams team, int position)
+    {
+        Vector3 randomPosition = GetRandomPositionInCourt(team);
+        float randomRotation = Random.Range(0, 360);
+        float randomThrowForce = Random.Range(_baseThrowForceMin, _baseThrowForceMax);
+        float randomAccuracy = Random.Range(_baseAccuracyMin, _baseAccuracyMax);
+        float randomReactionTime = Random.Range(_baseReactionTimeMin, _baseReactionTimeMax);
+        float randomDefenseTime = Random.Range(_baseDefenseTimeMin, _baseDefenseTimeMax);
+        float randomLinearSpeed = Random.Range(_baseLinearSpeedMin, _baseLinearSpeedMax);
+        float randomAngularSpeed = Random.Range(_baseAngularSpeedMin, _baseAngularSpeedMax);
+
+        GameObject teamMember = Instantiate(_teamMemberPrefab, randomPosition, Quaternion.Euler(new Vector3(0, randomRotation, 0)));
+        Agent agent = teamMember.GetComponent<Agent>();
+
+        agent.Configure(team: team,
+                        generatedThrowForce: randomThrowForce,
+                        generatedAccuracy: randomAccuracy,
+                        generatedReactionTime: randomReactionTime,
+                        generatedDefenseTime: randomDefenseTime,
+                        generatedLinearSpeed: randomLinearSpeed,
+                        generatedAngularSpeed: randomAngularSpeed);
+
+        agent.name = string.Format("{0} player {1}", team, position);
+
+        Debug.LogFormat("{0} generated with: \n randomThrowForce: {1} \n randomAccuracy: {2} \n randomReactionTime: {3} \n randomDefenseTime: {4} \n randomLinearSpeed: {5} \n randomAngularSpeed: {6}", agent.name, randomThrowForce, randomAccuracy, randomReactionTime, randomDefenseTime, randomLinearSpeed, randomAngularSpeed);
+
+        return agent;
+    }
+
 
     private Vector3 GetRandomPositionInCourt(Teams courtSide)
     {
 
-        float randomX = Random.Range(GetTeamBoundaries(courtSide).minX + Agent.maxDistanceToBoundaries, GetTeamBoundaries(courtSide).maxX - Agent.maxDistanceToBoundaries);
-        float randomZ = Random.Range(GetTeamBoundaries(courtSide).minZ + Agent.maxDistanceToBoundaries, GetTeamBoundaries(courtSide).maxZ - Agent.maxDistanceToBoundaries);
+        float randomX = Random.Range(GetTeamBoundaries(courtSide).minX + Agent.MAX_DISTANCE_TO_BOUNDARIES, GetTeamBoundaries(courtSide).maxX - Agent.MAX_DISTANCE_TO_BOUNDARIES);
+        float randomZ = Random.Range(GetTeamBoundaries(courtSide).minZ + Agent.MAX_DISTANCE_TO_BOUNDARIES, GetTeamBoundaries(courtSide).maxZ - Agent.MAX_DISTANCE_TO_BOUNDARIES);
 
         List<Agent> team = null;
         switch (courtSide)
